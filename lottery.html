@@ -1,0 +1,3224 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>研发部年会抽奖系统</title>
+   <style>
+       * {
+           margin: 0;
+           padding: 0;
+           box-sizing: border-box;
+       }
+
+       body {
+            /* 删除或注释掉原有的渐变背景 */
+            /* background: linear-gradient(135deg, #8B0000, #DC143C, #B22222, #FF6347); */
+            /* background-size: 400% 400%; */
+            /* animation: gradientBG 8s ease infinite; */
+            
+            /* 添加背景图片 */
+            background-image: url('bj.jpg');  /* 修改为您的图片文件名 */
+            background-size: cover;                   /* 覆盖整个屏幕 */
+            background-position: center center;       /* 居中显示 */
+            background-repeat: no-repeat;             /* 不重复 */
+            background-attachment: fixed;             /* 固定背景，不随滚动移动 */
+            
+            /* 保持其他样式不变 */
+            color: #FFD700;
+            font-family: 'Segoe UI', 'Microsoft YaHei', 'SimHei', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+       }
+
+       @keyframes gradientBG {
+           0% { background-position: 0% 50%; }
+           50% { background-position: 100% 50%; }
+           100% { background-position: 0% 50%; }
+       }
+
+       /* 新年装饰 */
+       .decoration {
+           position: absolute;
+           pointer-events: none;
+           z-index: 1;
+       }
+
+       .lantern {
+           width: 60px;
+           height: 80px;
+           background: radial-gradient(circle, #FFD700, #FFA500);
+           border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+           box-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+           animation: swing 3s ease-in-out infinite;
+       }
+
+       .lantern::before {
+           content: '福';
+           position: absolute;
+           top: 50%;
+           left: 50%;
+           transform: translate(-50%, -50%);
+           font-size: 24px;
+           color: #8B0000;
+           font-weight: bold;
+       }
+
+       @keyframes swing {
+           0%, 100% { transform: rotate(-5deg); }
+           50% { transform: rotate(5deg); }
+       }
+
+       .firework {
+           width: 4px;
+           height: 4px;
+           background: #FFD700;
+           border-radius: 50%;
+           position: absolute;
+           animation: firework 2s linear infinite;
+       }
+
+       @keyframes firework {
+           0% { transform: translateY(0) scale(1); opacity: 1; }
+           100% { transform: translateY(-200px) scale(0); opacity: 0; }
+       }
+
+       .container {
+           width: 95%;
+           max-width: 1400px;
+           text-align: center;
+           position: relative;
+           z-index: 10;
+       }
+
+       h1 {
+           font-size: 3.5em;
+           margin-bottom: 30px;
+           text-shadow: 0 0 30px rgba(255, 215, 0, 1);
+           background: linear-gradient(45deg, #FFD700, #FFA500, #FF6347);
+           -webkit-background-clip: text;
+           -webkit-text-fill-color: transparent;
+           animation: glow 2s ease-in-out infinite, bounce 2s ease-in-out infinite;
+           position: relative;
+       }
+
+       h1::before, h1::after {
+           content: '🧧';
+           position: absolute;
+           top: 50%;
+           transform: translateY(-50%);
+           font-size: 0.8em;
+           animation: rotate 3s linear infinite;
+       }
+
+       h1::before { left: -60px; }
+       h1::after { right: -60px; }
+
+       @keyframes glow {
+           0%, 100% { filter: brightness(1) drop-shadow(0 0 20px #FFD700); }
+           50% { filter: brightness(1.3) drop-shadow(0 0 40px #FFD700); }
+       }
+
+       @keyframes bounce {
+           0%, 100% { transform: translateY(0); }
+           50% { transform: translateY(-10px); }
+       }
+
+       @keyframes rotate {
+           from { transform: rotate(0deg); }
+           to { transform: rotate(360deg); }
+       }
+
+       .stage {
+           display: none;
+           animation: fadeIn 0.5s ease-in;
+       }
+
+       .stage.active {
+           display: block;
+       }
+
+       @keyframes fadeIn {
+           from { opacity: 0; transform: translateY(20px) scale(0.9); }
+           to { opacity: 1; transform: translateY(0) scale(1); }
+       }
+
+       #uploadArea {
+           background: rgba(139, 0, 0, 0.7);
+           padding: 40px;
+           border-radius: 20px;
+           backdrop-filter: blur(10px);
+           border: 3px solid #FFD700;
+           box-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
+           position: relative;
+           overflow: hidden;
+       }
+
+       #uploadArea::before {
+           content: '';
+           position: absolute;
+           top: -50%;
+           left: -50%;
+           width: 200%;
+           height: 200%;
+           background: repeating-linear-gradient(
+               45deg,
+               transparent,
+               transparent 10px,
+               rgba(255, 215, 0, 0.1) 10px,
+               rgba(255, 215, 0, 0.1) 20px
+           );
+           animation: shine 3s linear infinite;
+       }
+
+       @keyframes shine {
+           0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+           100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+       }
+
+       input[type="file"] {
+           display: none;
+       }
+
+       .upload-btn {
+           background: linear-gradient(45deg, #FFD700, #FFA500, #FF6347);
+           color: #8B0000;
+           padding: 15px 40px;
+           font-size: 1.3em;
+           border: none;
+           border-radius: 50px;
+           cursor: pointer;
+           transition: all 0.3s;
+           font-weight: bold;
+           box-shadow: 0 5px 20px rgba(255, 215, 0, 0.6);
+           position: relative;
+           overflow: hidden;
+           z-index: 1;
+       }
+
+       .upload-btn::before {
+           content: '🎊';
+           margin-right: 10px;
+       }
+
+       .upload-btn::after {
+           content: '';
+           position: absolute;
+           top: -50%;
+           left: -50%;
+           width: 200%;
+           height: 200%;
+           background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+           transform: rotate(30deg);
+           transition: all 0.6s;
+           z-index: -1;
+       }
+
+       .upload-btn:hover {
+           transform: translateY(-5px) scale(1.05);
+           box-shadow: 0 10px 30px rgba(255, 215, 0, 0.8);
+       }
+
+       .upload-btn:hover::after {
+           transform: rotate(30deg) translate(50%, 50%);
+       }
+
+       input[type="file"] {
+           display: none;
+       }
+
+       /* 显示框样式 - 网格滚动专用 */
+       #display {
+           height: 60vh;
+           overflow: hidden;
+           border: 4px solid #FFD700;
+           padding: 20px;
+           margin: 20px 0;
+           background: rgba(139, 0, 0, 0.4);
+           border-radius: 20px;
+           position: relative;
+           backdrop-filter: blur(5px);
+           display: grid !important;
+           grid-template-columns: repeat(8, 1fr);
+           gap: 8px;
+           padding: 15px;
+           overflow-y: auto;
+           box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.5);
+       }
+
+       /* 滚动动画 */
+       .rolling {
+           animation: gridRoll 0.05s linear infinite;
+       }
+
+       @keyframes gridRoll {
+           0% { transform: translateY(0); }
+           100% { transform: translateY(-100%); }
+       }
+
+       /* 滚动项样式 */
+       .roll-item {
+           padding: 12px 8px;
+           margin: 0;
+           background: rgba(255, 255, 255, 0.1);
+           border-radius: 12px;
+           border: 2px solid rgba(255, 215, 0, 0.3);
+           text-align: center;
+           line-height: 1.3;
+           word-break: break-all;
+           display: flex;
+           flex-direction: column;
+           justify-content: center;
+           min-height: 80px;
+           transition: all 0.3s ease;
+           color: #FFD700;
+           font-weight: bold;
+           box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+       }
+
+       /* 中奖者项样式 */
+       .winner-item {
+           padding: 12px 8px;
+           margin: 0;
+           background: linear-gradient(135deg, #FFD700, #FFA500);
+           border-radius: 12px;
+           animation: slideIn 0.5s ease-out;
+           border: 2px solid #FFD700;
+           text-align: center;
+           line-height: 1.3;
+           word-break: break-all;
+           display: flex;
+           flex-direction: column;
+           justify-content: center;
+           min-height: 80px;
+           transition: all 0.3s ease;
+           color: #8B0000;
+           font-weight: bold;
+           box-shadow: 0 4px 15px rgba(255, 215, 0, 0.6);
+           position: relative;
+           overflow: hidden;
+       }
+
+       /* .winner-item::before {
+           content: '🎉';
+           position: absolute;
+           top: 5px;
+           right: 5px;
+           font-size: 1.2em;
+           animation: bounce 1s ease infinite;
+       } */
+
+       @keyframes slideIn {
+           from { opacity: 0; transform: translateX(-50px) rotate(-180deg); }
+           to { opacity: 1; transform: translateX(0) rotate(0deg); }
+       }
+
+       /* 部门信息样式 - 修改为继承父元素颜色 */
+       .department-info {
+           font-size: 0.8em;
+           margin-top: 3px;
+           /* 去掉固定颜色，继承父元素颜色 */
+           color: inherit;
+       }
+
+       /* 汇总内容网格布局 */
+       .summary-content {
+           display: grid;
+           grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+           gap: 8px;
+           padding: 15px;
+           overflow-y: auto;
+           font-size: 1em;
+       }
+
+       #numberDisplay {
+           display: grid;
+           grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+           gap: 6px;
+           max-height: 75vh;
+           overflow-y: auto;
+           padding: 15px;
+           background: rgba(139, 0, 0, 0.4);
+           border-radius: 20px;
+           border: 3px solid #FFD700;
+           backdrop-filter: blur(5px);
+           font-size: 0.75em;
+           box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.5);
+       }
+
+       .number-item {
+           background: rgba(255, 255, 255, 0.1);
+           padding: 8px 4px;
+           border-radius: 12px;
+           transition: all 0.3s;
+           cursor: pointer;
+           border: 2px solid rgba(255, 215, 0, 0.3);
+           font-size: 0.9em;
+           line-height: 1.1;
+           text-align: center;
+           word-break: break-all;
+           color: #FFD700;
+           font-weight: bold;
+           position: relative;
+           overflow: hidden;
+       }
+
+       .number-item:hover {
+           transform: scale(1.1) rotate(5deg);
+           background: rgba(255, 215, 0, 0.3);
+           box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+       }
+
+       .number-item.highlight {
+           background: linear-gradient(45deg, #FFD700, #FFA500) !important;
+           color: #8B0000 !important;
+           font-weight: bold;
+           transform: scale(1.15) rotate(10deg);
+           box-shadow: 0 0 25px rgba(255, 215, 0, 1);
+           animation: pulse 1s infinite, rotate 0.5s linear;
+           border: 2px solid #FFD700;
+           z-index: 10;
+       }
+
+       @keyframes pulse {
+           0% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.8); }
+           50% { box-shadow: 0 0 40px rgba(255, 215, 0, 1); }
+           100% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.8); }
+       }
+
+       button {
+           background: linear-gradient(45deg, #FFD700, #FFA500, #FF6347);
+           color: #8B0000;
+           padding: 15px 40px;
+           font-size: 1.2em;
+           border: none;
+           border-radius: 50px;
+           cursor: pointer;
+           margin: 10px;
+           transition: all 0.3s;
+           font-weight: bold;
+           box-shadow: 0 5px 20px rgba(255, 215, 0, 0.6);
+           position: relative;
+           overflow: hidden;
+           z-index: 1;
+       }
+
+       button::before {
+           content: '';
+           position: absolute;
+           top: -50%;
+           left: -50%;
+           width: 200%;
+           height: 200%;
+           background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+           transform: rotate(30deg);
+           transition: all 0.6s;
+           z-index: -1;
+       }
+
+       button:hover {
+           transform: translateY(-5px) scale(1.05);
+           box-shadow: 0 10px 30px rgba(255, 215, 0, 0.8);
+       }
+
+       button:hover::before {
+           transform: rotate(30deg) translate(50%, 50%);
+       }
+
+       button:active {
+           transform: translateY(0) scale(0.95);
+       }
+
+       button:disabled {
+           background: #666 !important;
+           cursor: not-allowed;
+       }
+
+       .award-info {
+           font-size: 1.5em;
+           margin-bottom: 20px;
+           padding: 15px;
+           background: linear-gradient(135deg, rgba(139, 0, 0, 0.8), rgba(220, 20, 60, 0.8));
+           border-radius: 15px;
+           border: 3px solid #FFD700;
+           box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+           position: relative;
+           overflow: hidden;
+       }
+
+       .award-info::before {
+           content: '🎊';
+           position: absolute;
+           left: 20px;
+           top: 50%;
+           transform: translateY(-50%);
+           font-size: 1.5em;
+       }
+
+       .award-info::after {
+           content: '🎊';
+           position: absolute;
+           right: 20px;
+           top: 50%;
+           transform: translateY(-50%);
+           font-size: 1.5em;
+       }
+
+       .input-group {
+           margin: 20px 0;
+       }
+
+       input[type="number"] {
+           padding: 12px 20px;
+           font-size: 1.2em;
+           border-radius: 10px;
+           border: 3px solid #FFD700;
+           background: rgba(139, 0, 0, 0.5);
+           color: #FFD700;
+           text-align: center;
+           width: 200px;
+           font-weight: bold;
+           box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.3);
+       }
+
+       input[type="number"]::placeholder {
+           color: rgba(255, 215, 0, 0.6);
+       }
+
+       .progress {
+           position: fixed;
+           top: 20px;
+           right: 20px;
+           background: linear-gradient(135deg, rgba(139, 0, 0, 0.9), rgba(220, 20, 60, 0.9));
+           padding: 15px;
+           border-radius: 15px;
+           border: 3px solid #FFD700;
+           backdrop-filter: blur(5px);
+           max-width: 250px;
+           box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+           z-index: 100;
+       }
+/* 鼠标悬停时展开 */
+.progress:hover {
+    max-height: 400px;
+    padding: 15px;
+}
+       .progress h3 {
+           margin-bottom: 10px;
+           color: #FFD700;
+           text-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
+           font-size: 1.3em;
+           text-align: center;
+       }
+
+       /* 进度项容器 - 添加过渡效果 */
+#progressList {
+    max-height: 0;
+    opacity: 0;
+    transition: all 0.3s ease;
+}
+
+.progress:hover #progressList {
+    max-height: 350px;
+    opacity: 1;
+}
+
+       .progress-item {
+           margin: 5px 0;
+           font-size: 0.9em;
+           padding: 5px;
+           border-radius: 5px;
+           transition: all 0.3s;
+       }
+
+       .progress-item.completed {
+           background: rgba(76, 175, 80, 0.3);
+           color: #4CAF50;
+           font-weight: bold;
+       }
+
+       .progress-item.current {
+           background: rgba(255, 215, 0, 0.3);
+           color: #FFD700;
+           font-weight: bold;
+           animation: pulse 1s infinite;
+       }
+
+       .progress-item.pending {
+           color: #888;
+       }
+
+       .winner-modal-overlay {
+           position: fixed;
+           top: 0;
+           left: 0;
+           width: 100%;
+           height: 100%;
+           background: radial-gradient(circle, rgba(139, 0, 0, 0.9), rgba(0, 0, 0, 0.9));
+           backdrop-filter: blur(10px);
+           display: flex;
+           align-items: center;
+           justify-content: center;
+           z-index: 9999;
+           opacity: 0;
+           visibility: hidden;
+           transition: all 0.5s ease;
+       }
+
+       .winner-modal-overlay.active {
+           opacity: 1;
+           visibility: visible;
+       }
+
+       .winner-modal {
+           background: linear-gradient(135deg, #FFD700, #FFA500);
+           border-radius: 30px;
+           padding: 40px;
+           text-align: center;
+           color: #8B0000;
+           position: relative;
+           transform: scale(0) rotate(0deg);
+           transition: all 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+           box-shadow: 0 0 50px rgba(255, 215, 0, 1);
+           min-width: 400px;
+           max-width: 90%;
+           border: 5px solid #FFD700;
+           overflow: hidden;
+       }
+
+       .winner-modal::before {
+           content: '';
+           position: absolute;
+           top: -10px;
+           left: -10px;
+           right: -10px;
+           bottom: -10px;
+           background: repeating-linear-gradient(
+               45deg,
+               transparent,
+               transparent 10px,
+               rgba(255, 215, 0, 0.3) 10px,
+               rgba(255, 215, 0, 0.3) 20px
+           );
+           border-radius: 35px;
+           z-index: -1;
+           animation: shine 2s linear infinite;
+       }
+
+       .winner-modal-overlay.active .winner-modal {
+           transform: scale(1) rotate(360deg);
+       }
+
+       .winner-modal h2 {
+           font-size: 2.5em;
+           margin-bottom: 20px;
+           text-shadow: 0 0 10px rgba(139, 0, 0, 0.3);
+           animation: bounce 1s ease infinite;
+       }
+
+       .winner-modal .trophy {
+           font-size: 4em;
+           margin: 20px 0;
+           animation: rotate 2s linear infinite;
+       }
+
+       .winner-modal .winner-info {
+           background: rgba(255, 255, 255, 0.9);
+           padding: 20px;
+           border-radius: 15px;
+           margin: 20px 0;
+           box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+           border: 3px solid #FFD700;
+       }
+
+       .winner-modal .winner-info h3 {
+           font-size: 1.8em;
+           margin-bottom: 10px;
+           color: #8B0000;
+       }
+
+       .winner-modal .winner-info p {
+           font-size: 1.2em;
+           color: #555;
+           margin: 5px 0;
+       }
+
+       .winner-modal .close-btn {
+           background: #8B0000;
+           color: #FFD700;
+           border: none;
+           padding: 12px 30px;
+           font-size: 1.1em;
+           border-radius: 25px;
+           cursor: pointer;
+           margin-top: 20px;
+           font-weight: bold;
+           transition: all 0.3s;
+           box-shadow: 0 5px 15px rgba(139, 0, 0, 0.5);
+       }
+
+       .winner-modal .close-btn:hover {
+           transform: scale(1.1);
+           box-shadow: 0 8px 25px rgba(139, 0, 0, 0.7);
+       }
+
+       .reset-btn {
+           background: linear-gradient(45deg, #ff4757, #ff3838) !important;
+           color: #fff !important;
+           box-shadow: 0 5px 15px rgba(255, 71, 87, 0.4) !important;
+       }
+
+       .reset-btn:hover {
+           box-shadow: 0 8px 25px rgba(255, 71, 87, 0.6) !important;
+       }
+
+       .reset-btn:disabled {
+           background: #666 !important;
+           cursor: not-allowed !important;
+           transform: none !important;
+           box-shadow: none !important;
+       }
+
+       /* 汇总区域样式优化 - 去掉背景色和边框 */
+       .award-summary {
+            background: rgba(0, 0, 0, 0.85) !important;  /* 深黑色半透明背景 */
+            border: 3px solid #FFD700 !important;        /* 金色边框 */
+            border-radius: 20px !important;              /* 圆角 */
+            padding: 25px;
+            margin: 20px 0;
+            max-height: 75vh;
+            overflow-y: auto;
+            backdrop-filter: blur(10px) !important;      /* 毛玻璃效果 */
+            animation: fadeIn 0.5s ease-in;
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.5) !important; /* 金色光晕 */
+       }
+
+       .summary-title {
+           font-size: 2em;
+           color: #FFD700;
+           margin-bottom: 25px;
+           text-shadow: 0 0 15px rgba(255, 215, 0, 1);
+           text-align: center;
+           padding-bottom: 10px;
+           border-bottom: 3px solid #FFD700;
+           position: relative;
+       }
+
+       .summary-title::before, .summary-title::after {
+           content: '🎊';
+           position: absolute;
+           top: 50%;
+           transform: translateY(-50%);
+       }
+
+       .summary-title::before { left: 20%; }
+       .summary-title::after { right: 20%; }
+
+       .summary-stats {
+           font-size: 1.3em;
+           color: #FFA500;
+           margin-bottom: 20px;
+           padding: 12px;
+           background: rgba(255, 215, 0, 0.2);
+           border-radius: 10px;
+           text-align: center;
+           font-weight: bold;
+           border: 2px solid #FFD700;
+       }
+
+       /* 部门分组样式优化 - 去掉背景色和边框 */
+       .department-group {
+           margin: 20px 0;
+           padding: 20px;
+           /* 去掉背景色 */
+           background: none !important;
+           /* 去掉圆角 */
+           border-radius: 0 !important;
+           /* 去掉边框 */
+           border: none !important;
+           animation: fadeIn 0.5s ease-in;
+           /* 去掉阴影 */
+           box-shadow: none !important;
+       }
+
+       .department-header {
+           font-size: 1.4em;
+           color: #FFD700;
+           margin-bottom: 15px;
+           font-weight: bold;
+           display: flex;
+           justify-content: space-between;
+           align-items: center;
+           padding-bottom: 10px;
+           border-bottom: 3px solid #FFD700;
+           text-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
+       }
+
+       .department-count {
+           font-size: 1em;
+           color: #FFA500;
+           background: rgba(139, 0, 0, 0.6);
+           padding: 6px 15px;
+           border-radius: 20px;
+           font-weight: bold;
+           border: 2px solid #FFD700;
+       }
+
+       .department-winners {
+           display: grid;
+           grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+           gap: 8px;
+           padding: 10px 0;
+       }
+
+       /* 汇总页面中奖者项样式 - 完全去掉背景色、边框和装饰 */
+       .department-winners .winner-item {
+           padding: 10px;
+           margin: 0;
+           font-size: 0.85em;
+           text-align: left;
+           /* 去掉背景色 */
+           background: none !important;
+           /* 去掉边框 */
+           border: none !important;
+           color: #FFD700;
+           font-weight: bold;
+           position: relative;
+           /* 移除圆角 */
+           border-radius: 0 !important;
+           /* 移除阴影 */
+           box-shadow: none !important;
+           /* 去掉下划线 */
+           border-bottom: none !important;
+           /* 去掉动画效果 */
+           animation: none !important;
+       }
+
+       .department-winners .winner-item::before {
+           /* 去掉装饰图标 */
+           display: none !important;
+       }
+
+       /* 汇总内容网格布局 */
+       .summary-content {
+           display: grid;
+           grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+           gap: 8px;
+           padding: 15px;
+           overflow-y: auto;
+           font-size: 1em;
+       }
+
+       #numberDisplay {
+           display: grid;
+           grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+           gap: 6px;
+           max-height: 75vh;
+           overflow-y: auto;
+           padding: 15px;
+           background: rgba(139, 0, 0, 0.4);
+           border-radius: 20px;
+           border: 3px solid #FFD700;
+           backdrop-filter: blur(5px);
+           font-size: 0.75em;
+           box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.5);
+       }
+
+       .number-item {
+           background: rgba(255, 255, 255, 0.1);
+           padding: 8px 4px;
+           border-radius: 12px;
+           transition: all 0.3s;
+           cursor: pointer;
+           border: 2px solid rgba(255, 215, 0, 0.3);
+           font-size: 0.9em;
+           line-height: 1.1;
+           text-align: center;
+           word-break: break-all;
+           color: #FFD700;
+           font-weight: bold;
+           position: relative;
+           overflow: hidden;
+       }
+
+       .number-item:hover {
+           transform: scale(1.1) rotate(5deg);
+           background: rgba(255, 215, 0, 0.3);
+           box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+       }
+
+       .number-item.highlight {
+           background: linear-gradient(45deg, #FFD700, #FFA500) !important;
+           color: #8B0000 !important;
+           font-weight: bold;
+           transform: scale(1.15) rotate(10deg);
+           box-shadow: 0 0 25px rgba(255, 215, 0, 1);
+           animation: pulse 1s infinite, rotate 0.5s linear;
+           border: 2px solid #FFD700;
+           z-index: 10;
+       }
+
+       @keyframes pulse {
+           0% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.8); }
+           50% { box-shadow: 0 0 40px rgba(255, 215, 0, 1); }
+           100% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.8); }
+       }
+
+       button {
+           background: linear-gradient(45deg, #FFD700, #FFA500, #FF6347);
+           color: #8B0000;
+           padding: 15px 40px;
+           font-size: 1.2em;
+           border: none;
+           border-radius: 50px;
+           cursor: pointer;
+           margin: 10px;
+           transition: all 0.3s;
+           font-weight: bold;
+           box-shadow: 0 5px 20px rgba(255, 215, 0, 0.6);
+           position: relative;
+           overflow: hidden;
+           z-index: 1;
+       }
+
+       button::before {
+           content: '';
+           position: absolute;
+           top: -50%;
+           left: -50%;
+           width: 200%;
+           height: 200%;
+           background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+           transform: rotate(30deg);
+           transition: all 0.6s;
+           z-index: -1;
+       }
+
+       button:hover {
+           transform: translateY(-5px) scale(1.05);
+           box-shadow: 0 10px 30px rgba(255, 215, 0, 0.8);
+       }
+
+       button:hover::before {
+           transform: rotate(30deg) translate(50%, 50%);
+       }
+
+       button:active {
+           transform: translateY(0) scale(0.95);
+       }
+
+       button:disabled {
+           background: #666 !important;
+           cursor: not-allowed;
+       }
+
+       .award-info {
+           font-size: 1.5em;
+           margin-bottom: 20px;
+           padding: 15px;
+           background: linear-gradient(135deg, rgba(139, 0, 0, 0.8), rgba(220, 20, 60, 0.8));
+           border-radius: 15px;
+           border: 3px solid #FFD700;
+           box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+           position: relative;
+           overflow: hidden;
+       }
+
+       .award-info::before {
+           content: '🎊';
+           position: absolute;
+           left: 20px;
+           top: 50%;
+           transform: translateY(-50%);
+           font-size: 1.5em;
+       }
+
+       .award-info::after {
+           content: '🎊';
+           position: absolute;
+           right: 20px;
+           top: 50%;
+           transform: translateY(-50%);
+           font-size: 1.5em;
+       }
+
+       .input-group {
+           margin: 20px 0;
+       }
+
+       input[type="number"] {
+           padding: 12px 20px;
+           font-size: 1.2em;
+           border-radius: 10px;
+           border: 3px solid #FFD700;
+           background: rgba(139, 0, 0, 0.5);
+           color: #FFD700;
+           text-align: center;
+           width: 200px;
+           font-weight: bold;
+           box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.3);
+       }
+
+       input[type="number"]::placeholder {
+           color: rgba(255, 215, 0, 0.6);
+       }
+
+       .progress {
+           position: fixed;
+           top: 20px;
+           right: 20px;
+           background: linear-gradient(135deg, rgba(139, 0, 0, 0.9), rgba(220, 20, 60, 0.9));
+           padding: 15px;
+           border-radius: 15px;
+           border: 3px solid #FFD700;
+           backdrop-filter: blur(5px);
+           max-width: 250px;
+           box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+           z-index: 100;
+       }
+
+       .progress h3 {
+           margin-bottom: 10px;
+           color: #FFD700;
+           text-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
+           font-size: 1.3em;
+           text-align: center;
+       }
+
+       .progress-item {
+           margin: 5px 0;
+           font-size: 0.9em;
+           padding: 5px;
+           border-radius: 5px;
+           transition: all 0.3s;
+       }
+
+       .progress-item.completed {
+           background: rgba(76, 175, 80, 0.3);
+           color: #4CAF50;
+           font-weight: bold;
+       }
+
+       .progress-item.current {
+           background: rgba(255, 215, 0, 0.3);
+           color: #FFD700;
+           font-weight: bold;
+           animation: pulse 1s infinite;
+       }
+
+       .progress-item.pending {
+           color: #888;
+       }
+
+       .winner-modal-overlay {
+           position: fixed;
+           top: 0;
+           left: 0;
+           width: 100%;
+           height: 100%;
+           background: radial-gradient(circle, rgba(139, 0, 0, 0.9), rgba(0, 0, 0, 0.9));
+           backdrop-filter: blur(10px);
+           display: flex;
+           align-items: center;
+           justify-content: center;
+           z-index: 9999;
+           opacity: 0;
+           visibility: hidden;
+           transition: all 0.5s ease;
+       }
+
+       .winner-modal-overlay.active {
+           opacity: 1;
+           visibility: visible;
+       }
+
+       .winner-modal {
+           background: linear-gradient(135deg, #FFD700, #FFA500);
+           border-radius: 30px;
+           padding: 40px;
+           text-align: center;
+           color: #8B0000;
+           position: relative;
+           transform: scale(0) rotate(0deg);
+           transition: all 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+           box-shadow: 0 0 50px rgba(255, 215, 0, 1);
+           min-width: 400px;
+           max-width: 90%;
+           border: 5px solid #FFD700;
+           overflow: hidden;
+       }
+
+       .winner-modal::before {
+           content: '';
+           position: absolute;
+           top: -10px;
+           left: -10px;
+           right: -10px;
+           bottom: -10px;
+           background: repeating-linear-gradient(
+               45deg,
+               transparent,
+               transparent 10px,
+               rgba(255, 215, 0, 0.3) 10px,
+               rgba(255, 215, 0, 0.3) 20px
+           );
+           border-radius: 35px;
+           z-index: -1;
+           animation: shine 2s linear infinite;
+       }
+
+       .winner-modal-overlay.active .winner-modal {
+           transform: scale(1) rotate(360deg);
+       }
+
+       .winner-modal h2 {
+           font-size: 2.5em;
+           margin-bottom: 20px;
+           text-shadow: 0 0 10px rgba(139, 0, 0, 0.3);
+           animation: bounce 1s ease infinite;
+       }
+
+       .winner-modal .trophy {
+           font-size: 4em;
+           margin: 20px 0;
+           animation: rotate 2s linear infinite;
+       }
+
+       .winner-modal .winner-info {
+           background: rgba(255, 255, 255, 0.9);
+           padding: 20px;
+           border-radius: 15px;
+           margin: 20px 0;
+           box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+           border: 3px solid #FFD700;
+       }
+
+       .winner-modal .winner-info h3 {
+           font-size: 1.8em;
+           margin-bottom: 10px;
+           color: #8B0000;
+       }
+
+       .winner-modal .winner-info p {
+           font-size: 1.2em;
+           color: #555;
+           margin: 5px 0;
+       }
+
+       .winner-modal .close-btn {
+           background: #8B0000;
+           color: #FFD700;
+           border: none;
+           padding: 12px 30px;
+           font-size: 1.1em;
+           border-radius: 25px;
+           cursor: pointer;
+           margin-top: 20px;
+           font-weight: bold;
+           transition: all 0.3s;
+           box-shadow: 0 5px 15px rgba(139, 0, 0, 0.5);
+       }
+
+       .winner-modal .close-btn:hover {
+           transform: scale(1.1);
+           box-shadow: 0 8px 25px rgba(139, 0, 0, 0.7);
+       }
+
+       .reset-btn {
+           background: linear-gradient(45deg, #ff4757, #ff3838) !important;
+           color: #fff !important;
+           box-shadow: 0 5px 15px rgba(255, 71, 87, 0.4) !important;
+       }
+
+       .reset-btn:hover {
+           box-shadow: 0 8px 25px rgba(255, 71, 87, 0.6) !important;
+       }
+
+       .reset-btn:disabled {
+           background: #666 !important;
+           cursor: not-allowed !important;
+           transform: none !important;
+           box-shadow: none !important;
+       }
+
+        /* 汇总区域样式 - 添加深色遮罩 */
+        .award-summary {
+            background: rgba(0, 0, 0, 0.85) !important;  /* 深黑色半透明背景 */
+            border: 3px solid #FFD700 !important;        /* 金色边框 */
+            border-radius: 20px !important;              /* 圆角 */
+            padding: 25px;
+            margin: 20px 0;
+            max-height: 75vh;
+            overflow-y: auto;
+            backdrop-filter: blur(10px) !important;      /* 毛玻璃效果 */
+            animation: fadeIn 0.5s ease-in;
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.5) !important; /* 金色光晕 */
+        }
+
+
+       .summary-title {
+           font-size: 2em;
+           color: #FFD700;
+           margin-bottom: 25px;
+           text-shadow: 0 0 15px rgba(255, 215, 0, 1);
+           text-align: center;
+           padding-bottom: 10px;
+           border-bottom: 3px solid #FFD700;
+           position: relative;
+       }
+
+       .summary-title::before, .summary-title::after {
+           content: '🎊';
+           position: absolute;
+           top: 50%;
+           transform: translateY(-50%);
+       }
+
+       .summary-title::before { left: 20%; }
+       .summary-title::after { right: 20%; }
+
+       .summary-stats {
+           font-size: 1.3em;
+           color: #FFA500;
+           margin-bottom: 20px;
+           padding: 12px;
+           background: rgba(255, 215, 0, 0.2);
+           border-radius: 10px;
+           text-align: center;
+           font-weight: bold;
+           border: 2px solid #FFD700;
+       }
+
+       /* 部门分组样式优化 - 去掉背景色和边框 */
+       .department-group {
+           margin: 20px 0;
+           padding: 20px;
+           /* 去掉背景色 */
+           background: none !important;
+           /* 去掉圆角 */
+           border-radius: 0 !important;
+           /* 去掉边框 */
+           border: none !important;
+           animation: fadeIn 0.5s ease-in;
+           /* 去掉阴影 */
+           box-shadow: none !important;
+       }
+
+       .department-header {
+           font-size: 1.4em;
+           color: #FFD700;
+           margin-bottom: 15px;
+           font-weight: bold;
+           display: flex;
+           justify-content: space-between;
+           align-items: center;
+           padding-bottom: 10px;
+           border-bottom: 3px solid #FFD700;
+           text-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
+       }
+
+       .department-count {
+           font-size: 1em;
+           color: #FFA500;
+           background: rgba(139, 0, 0, 0.6);
+           padding: 6px 15px;
+           border-radius: 20px;
+           font-weight: bold;
+           border: 2px solid #FFD700;
+       }
+
+       .department-winners {
+           display: grid;
+           grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+           gap: 8px;
+           padding: 10px 0;
+       }
+
+       /* 汇总页面中奖者项样式 - 完全去掉背景色、边框和装饰 */
+       .department-winners .winner-item {
+           padding: 10px;
+           margin: 0;
+           font-size: 0.85em;
+           text-align: left;
+           /* 去掉背景色 */
+           background: none !important;
+           /* 去掉边框 */
+           border: none !important;
+           color: #FFD700;
+           font-weight: bold;
+           position: relative;
+           /* 移除圆角 */
+           border-radius: 0 !important;
+           /* 移除阴影 */
+           box-shadow: none !important;
+           /* 去掉下划线 */
+           border-bottom: none !important;
+           /* 去掉动画效果 */
+           animation: none !important;
+       }
+
+       .department-winners .winner-item::before {
+           /* 去掉装饰图标 */
+           display: none !important;
+       }
+
+       /* 汇总内容网格布局 */
+       .summary-content {
+           display: grid;
+           grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+           gap: 8px;
+           padding: 15px;
+           overflow-y: auto;
+           font-size: 1em;
+       }
+
+       #numberDisplay {
+           display: grid;
+           grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+           gap: 6px;
+           max-height: 75vh;
+           overflow-y: auto;
+           padding: 15px;
+           background: rgba(139, 0, 0, 0.4);
+           border-radius: 20px;
+           border: 3px solid #FFD700;
+           backdrop-filter: blur(5px);
+           font-size: 0.75em;
+           box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.5);
+       }
+
+       .number-item {
+           background: rgba(255, 255, 255, 0.1);
+           padding: 8px 4px;
+           border-radius: 12px;
+           transition: all 0.3s;
+           cursor: pointer;
+           border: 2px solid rgba(255, 215, 0, 0.3);
+           font-size: 0.9em;
+           line-height: 1.1;
+           text-align: center;
+           word-break: break-all;
+           color: #FFD700;
+           font-weight: bold;
+           position: relative;
+           overflow: hidden;
+       }
+
+       .number-item:hover {
+           transform: scale(1.1) rotate(5deg);
+           background: rgba(255, 215, 0, 0.3);
+           box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+       }
+
+       .number-item.highlight {
+           background: linear-gradient(45deg, #FFD700, #FFA500) !important;
+           color: #8B0000 !important;
+           font-weight: bold;
+           transform: scale(1.15) rotate(10deg);
+           box-shadow: 0 0 25px rgba(255, 215, 0, 1);
+           animation: pulse 1s infinite, rotate 0.5s linear;
+           border: 2px solid #FFD700;
+           z-index: 10;
+       }
+
+       @keyframes pulse {
+           0% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.8); }
+           50% { box-shadow: 0 0 40px rgba(255, 215, 0, 1); }
+           100% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.8); }
+       }
+
+       button {
+           background: linear-gradient(45deg, #FFD700, #FFA500, #FF6347);
+           color: #8B0000;
+           padding: 15px 40px;
+           font-size: 1.2em;
+           border: none;
+           border-radius: 50px;
+           cursor: pointer;
+           margin: 10px;
+           transition: all 0.3s;
+           font-weight: bold;
+           box-shadow: 0 5px 20px rgba(255, 215, 0, 0.6);
+           position: relative;
+           overflow: hidden;
+           z-index: 1;
+       }
+
+       button::before {
+           content: '';
+           position: absolute;
+           top: -50%;
+           left: -50%;
+           width: 200%;
+           height: 200%;
+           background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+           transform: rotate(30deg);
+           transition: all 0.6s;
+           z-index: -1;
+       }
+
+       button:hover {
+           transform: translateY(-5px) scale(1.05);
+           box-shadow: 0 10px 30px rgba(255, 215, 0, 0.8);
+       }
+
+       button:hover::before {
+           transform: rotate(30deg) translate(50%, 50%);
+       }
+
+       button:active {
+           transform: translateY(0) scale(0.95);
+       }
+
+       button:disabled {
+           background: #666 !important;
+           cursor: not-allowed;
+       }
+
+       .award-info {
+           font-size: 1.5em;
+           margin-bottom: 20px;
+           padding: 15px;
+           background: linear-gradient(135deg, rgba(139, 0, 0, 0.8), rgba(220, 20, 60, 0.8));
+           border-radius: 15px;
+           border: 3px solid #FFD700;
+           box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+           position: relative;
+           overflow: hidden;
+       }
+
+       .award-info::before {
+           content: '🎊';
+           position: absolute;
+           left: 20px;
+           top: 50%;
+           transform: translateY(-50%);
+           font-size: 1.5em;
+       }
+
+       .award-info::after {
+           content: '🎊';
+           position: absolute;
+           right: 20px;
+           top: 50%;
+           transform: translateY(-50%);
+           font-size: 1.5em;
+       }
+
+       .input-group {
+           margin: 20px 0;
+       }
+
+       input[type="number"] {
+           padding: 12px 20px;
+           font-size: 1.2em;
+           border-radius: 10px;
+           border: 3px solid #FFD700;
+           background: rgba(139, 0, 0, 0.5);
+           color: #FFD700;
+           text-align: center;
+           width: 200px;
+           font-weight: bold;
+           box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.3);
+       }
+
+       input[type="number"]::placeholder {
+           color: rgba(255, 215, 0, 0.6);
+       }
+
+       .progress {
+           position: fixed;
+           top: 20px;
+           right: 20px;
+           background: linear-gradient(135deg, rgba(139, 0, 0, 0.9), rgba(220, 20, 60, 0.9));
+           padding: 15px;
+           border-radius: 15px;
+           border: 3px solid #FFD700;
+           backdrop-filter: blur(5px);
+           max-width: 250px;
+           box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+           z-index: 100;
+       }
+
+       .progress h3 {
+           margin-bottom: 10px;
+           color: #FFD700;
+           text-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
+           font-size: 1.3em;
+           text-align: center;
+       }
+
+       .progress-item {
+           margin: 5px 0;
+           font-size: 0.9em;
+           padding: 5px;
+           border-radius: 5px;
+           transition: all 0.3s;
+       }
+
+       .progress-item.completed {
+           background: rgba(76, 175, 80, 0.3);
+           color: #4CAF50;
+           font-weight: bold;
+       }
+
+       .progress-item.current {
+           background: rgba(255, 215, 0, 0.3);
+           color: #FFD700;
+           font-weight: bold;
+           animation: pulse 1s infinite;
+       }
+
+       .progress-item.pending {
+           color: #888;
+       }
+
+       .winner-modal-overlay {
+           position: fixed;
+           top: 0;
+           left: 0;
+           width: 100%;
+           height: 100%;
+           background: radial-gradient(circle, rgba(139, 0, 0, 0.9), rgba(0, 0, 0, 0.9));
+           backdrop-filter: blur(10px);
+           display: flex;
+           align-items: center;
+           justify-content: center;
+           z-index: 9999;
+           opacity: 0;
+           visibility: hidden;
+           transition: all 0.5s ease;
+       }
+
+       .winner-modal-overlay.active {
+           opacity: 1;
+           visibility: visible;
+       }
+
+       .winner-modal {
+           background: linear-gradient(135deg, #FFD700, #FFA500);
+           border-radius: 30px;
+           padding: 40px;
+           text-align: center;
+           color: #8B0000;
+           position: relative;
+           transform: scale(0) rotate(0deg);
+           transition: all 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+           box-shadow: 0 0 50px rgba(255, 215, 0, 1);
+           min-width: 400px;
+           max-width: 90%;
+           border: 5px solid #FFD700;
+           overflow: hidden;
+       }
+
+       .winner-modal::before {
+           content: '';
+           position: absolute;
+           top: -10px;
+           left: -10px;
+           right: -10px;
+           bottom: -10px;
+           background: repeating-linear-gradient(
+               45deg,
+               transparent,
+               transparent 10px,
+               rgba(255, 215, 0, 0.3) 10px,
+               rgba(255, 215, 0, 0.3) 20px
+           );
+           border-radius: 35px;
+           z-index: -1;
+           animation: shine 2s linear infinite;
+       }
+
+       .winner-modal-overlay.active .winner-modal {
+           transform: scale(1) rotate(360deg);
+       }
+
+       .winner-modal h2 {
+           font-size: 2.5em;
+           margin-bottom: 20px;
+           text-shadow: 0 0 10px rgba(139, 0, 0, 0.3);
+           animation: bounce 1s ease infinite;
+       }
+
+       .winner-modal .trophy {
+           font-size: 4em;
+           margin: 20px 0;
+           animation: rotate 2s linear infinite;
+       }
+
+       .winner-modal .winner-info {
+           background: rgba(255, 255, 255, 0.9);
+           padding: 20px;
+           border-radius: 15px;
+           margin: 20px 0;
+           box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+           border: 3px solid #FFD700;
+       }
+
+       .winner-modal .winner-info h3 {
+           font-size: 1.8em;
+           margin-bottom: 10px;
+           color: #8B0000;
+       }
+
+       .winner-modal .winner-info p {
+           font-size: 1.2em;
+           color: #555;
+           margin: 5px 0;
+       }
+
+       .winner-modal .close-btn {
+           background: #8B0000;
+           color: #FFD700;
+           border: none;
+           padding: 12px 30px;
+           font-size: 1.1em;
+           border-radius: 25px;
+           cursor: pointer;
+           margin-top: 20px;
+           font-weight: bold;
+           transition: all 0.3s;
+           box-shadow: 0 5px 15px rgba(139, 0, 0, 0.5);
+       }
+
+       .winner-modal .close-btn:hover {
+           transform: scale(1.1);
+           box-shadow: 0 8px 25px rgba(139, 0, 0, 0.7);
+       }
+
+       .reset-btn {
+           background: linear-gradient(45deg, #ff4757, #ff3838) !important;
+           color: #fff !important;
+           box-shadow: 0 5px 15px rgba(255, 71, 87, 0.4) !important;
+       }
+
+       .reset-btn:hover {
+           box-shadow: 0 8px 25px rgba(255, 71, 87, 0.6) !important;
+       }
+
+       .reset-btn:disabled {
+           background: #666 !important;
+           cursor: not-allowed !important;
+           transform: none !important;
+           box-shadow: none !important;
+       }
+        /* 汇总区域样式 - 添加深色遮罩 */
+        .award-summary {
+            background: rgba(0, 0, 0, 0.85) !important;  /* 深黑色半透明背景 */
+            border: 3px solid #FFD700 !important;        /* 金色边框 */
+            border-radius: 20px !important;              /* 圆角 */
+            padding: 25px;
+            margin: 20px 0;
+            max-height: 75vh;
+            overflow-y: auto;
+            backdrop-filter: blur(10px) !important;      /* 毛玻璃效果 */
+            animation: fadeIn 0.5s ease-in;
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.5) !important; /* 金色光晕 */
+        }
+
+
+       .summary-title {
+           font-size: 2em;
+           color: #FFD700;
+           margin-bottom: 25px;
+           text-shadow: 0 0 15px rgba(255, 215, 0, 1);
+           text-align: center;
+           padding-bottom: 10px;
+           border-bottom: 3px solid #FFD700;
+           position: relative;
+       }
+
+       .summary-title::before, .summary-title::after {
+           content: '🎊';
+           position: absolute;
+           top: 50%;
+           transform: translateY(-50%);
+       }
+
+       .summary-title::before { left: 20%; }
+       .summary-title::after { right: 20%; }
+
+       .summary-stats {
+           font-size: 1.3em;
+           color: #FFA500;
+           margin-bottom: 20px;
+           padding: 12px;
+           background: rgba(255, 215, 0, 0.2);
+           border-radius: 10px;
+           text-align: center;
+           font-weight: bold;
+           border: 2px solid #FFD700;
+       }
+
+       /* 部门分组样式优化 - 去掉背景色和边框 */
+       .department-group {
+           margin: 20px 0;
+           padding: 20px;
+           /* 去掉背景色 */
+           background: none !important;
+           /* 去掉圆角 */
+           border-radius: 0 !important;
+           /* 去掉边框 */
+           border: none !important;
+           animation: fadeIn 0.5s ease-in;
+           /* 去掉阴影 */
+           box-shadow: none !important;
+       }
+
+       .department-header {
+           font-size: 1.4em;
+           color: #FFD700;
+           margin-bottom: 15px;
+           font-weight: bold;
+           display: flex;
+           justify-content: space-between;
+           align-items: center;
+           padding-bottom: 10px;
+           border-bottom: 3px solid #FFD700;
+           text-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
+       }
+
+       .department-count {
+           font-size: 1em;
+           color: #FFA500;
+           background: rgba(139, 0, 0, 0.6);
+           padding: 6px 15px;
+           border-radius: 20px;
+           font-weight: bold;
+           border: 2px solid #FFD700;
+       }
+
+       .department-winners {
+           display: grid;
+           grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+           gap: 8px;
+           padding: 10px 0;
+       }
+
+       /* 汇总页面中奖者项样式 - 完全去掉背景色、边框和装饰 */
+       .department-winners .winner-item {
+           padding: 10px;
+           margin: 0;
+           font-size: 0.85em;
+           text-align: left;
+           /* 去掉背景色 */
+           background: none !important;
+           /* 去掉边框 */
+           border: none !important;
+           color: #FFD700;
+           font-weight: bold;
+           position: relative;
+           /* 移除圆角 */
+           border-radius: 0 !important;
+           /* 移除阴影 */
+           box-shadow: none !important;
+           /* 去掉下划线 */
+           border-bottom: none !important;
+           /* 去掉动画效果 */
+           animation: none !important;
+       }
+
+       .department-winners .winner-item::before {
+           /* 去掉装饰图标 */
+           display: none !important;
+       }
+
+       /* 汇总内容网格布局 */
+       .summary-content {
+           display: grid;
+           grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+           gap: 8px;
+           padding: 15px;
+           overflow-y: auto;
+           font-size: 1em;
+       }
+
+       #numberDisplay {
+           display: grid;
+           grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+           gap: 6px;
+           max-height: 75vh;
+           overflow-y: auto;
+           padding: 15px;
+           background: rgba(139, 0, 0, 0.4);
+           border-radius: 20px;
+           border: 3px solid #FFD700;
+           backdrop-filter: blur(5px);
+           font-size: 0.75em;
+           box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.5);
+       }
+
+       .number-item {
+           background: rgba(255, 255, 255, 0.1);
+           padding: 8px 4px;
+           border-radius: 12px;
+           transition: all 0.3s;
+           cursor: pointer;
+           border: 2px solid rgba(255, 215, 0, 0.3);
+           font-size: 0.9em;
+           line-height: 1.1;
+           text-align: center;
+           word-break: break-all;
+           color: #FFD700;
+           font-weight: bold;
+           position: relative;
+           overflow: hidden;
+       }
+
+       .number-item:hover {
+           transform: scale(1.1) rotate(5deg);
+           background: rgba(255, 215, 0, 0.3);
+           box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+       }
+
+       .number-item.highlight {
+           background: linear-gradient(45deg, #FFD700, #FFA500) !important;
+           color: #8B0000 !important;
+           font-weight: bold;
+           transform: scale(1.15) rotate(10deg);
+           box-shadow: 0 0 25px rgba(255, 215, 0, 1);
+           animation: pulse 1s infinite, rotate 0.5s linear;
+           border: 2px solid #FFD700;
+           z-index: 10;
+       }
+
+       @keyframes pulse {
+           0% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.8); }
+           50% { box-shadow: 0 0 40px rgba(255, 215, 0, 1); }
+           100% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.8); }
+       }
+
+       button {
+           background: linear-gradient(45deg, #FFD700, #FFA500, #FF6347);
+           color: #8B0000;
+           padding: 15px 40px;
+           font-size: 1.2em;
+           border: none;
+           border-radius: 50px;
+           cursor: pointer;
+           margin: 10px;
+           transition: all 0.3s;
+           font-weight: bold;
+           box-shadow: 0 5px 20px rgba(255, 215, 0, 0.6);
+           position: relative;
+           overflow: hidden;
+           z-index: 1;
+       }
+
+       button::before {
+           content: '';
+           position: absolute;
+           top: -50%;
+           left: -50%;
+           width: 200%;
+           height: 200%;
+           background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+           transform: rotate(30deg);
+           transition: all 0.6s;
+           z-index: -1;
+       }
+
+       button:hover {
+           transform: translateY(-5px) scale(1.05);
+           box-shadow: 0 10px 30px rgba(255, 215, 0, 0.8);
+       }
+
+       button:hover::before {
+           transform: rotate(30deg) translate(50%, 50%);
+       }
+
+       button:active {
+           transform: translateY(0) scale(0.95);
+       }
+
+       button:disabled {
+           background: #666 !important;
+           cursor: not-allowed;
+       }
+
+       .award-info {
+           font-size: 1.5em;
+           margin-bottom: 20px;
+           padding: 15px;
+           background: linear-gradient(135deg, rgba(139, 0, 0, 0.8), rgba(220, 20, 60, 0.8));
+           border-radius: 15px;
+           border: 3px solid #FFD700;
+           box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+           position: relative;
+           overflow: hidden;
+       }
+
+       .award-info::before {
+           content: '🎊';
+           position: absolute;
+           left: 20px;
+           top: 50%;
+           transform: translateY(-50%);
+           font-size: 1.5em;
+       }
+
+       .award-info::after {
+           content: '🎊';
+           position: absolute;
+           right: 20px;
+           top: 50%;
+           transform: translateY(-50%);
+           font-size: 1.5em;
+       }
+
+       .input-group {
+           margin: 20px 0;
+       }
+
+       input[type="number"] {
+           padding: 12px 20px;
+           font-size: 1.2em;
+           border-radius: 10px;
+           border: 3px solid #FFD700;
+           background: rgba(139, 0, 0, 0.5);
+           color: #FFD700;
+           text-align: center;
+           width: 200px;
+           font-weight: bold;
+           box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.3);
+       }
+
+       input[type="number"]::placeholder {
+           color: rgba(255, 215, 0, 0.6);
+       }
+
+       .progress {
+           position: fixed;
+           top: 20px;
+           right: 20px;
+           background: linear-gradient(135deg, rgba(139, 0, 0, 0.9), rgba(220, 20, 60, 0.9));
+           padding: 15px;
+           border-radius: 15px;
+           border: 3px solid #FFD700;
+           backdrop-filter: blur(5px);
+           max-width: 250px;
+           box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+           z-index: 100;
+       }
+
+       .progress h3 {
+           margin-bottom: 10px;
+           color: #FFD700;
+           text-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
+           font-size: 1.3em;
+           text-align: center;
+       }
+
+       .progress-item {
+           margin: 5px 0;
+           font-size: 0.9em;
+           padding: 5px;
+           border-radius: 5px;
+           transition: all 0.3s;
+       }
+
+       .progress-item.completed {
+           background: rgba(76, 175, 80, 0.3);
+           color: #4CAF50;
+           font-weight: bold;
+       }
+
+       .progress-item.current {
+           background: rgba(255, 215, 0, 0.3);
+           color: #FFD700;
+           font-weight: bold;
+           animation: pulse 1s infinite;
+       }
+
+       .progress-item.pending {
+           color: #888;
+       }
+
+       .winner-modal-overlay {
+           position: fixed;
+           top: 0;
+           left: 0;
+           width: 100%;
+           height: 100%;
+           background: radial-gradient(circle, rgba(139, 0, 0, 0.9), rgba(0, 0, 0, 0.9));
+           backdrop-filter: blur(10px);
+           display: flex;
+           align-items: center;
+           justify-content: center;
+           z-index: 9999;
+           opacity: 0;
+           visibility: hidden;
+           transition: all 0.5s ease;
+       }
+
+       .winner-modal-overlay.active {
+           opacity: 1;
+           visibility: visible;
+       }
+
+       .winner-modal {
+           background: linear-gradient(135deg, #FFD700, #FFA500);
+           border-radius: 30px;
+           padding: 40px;
+           text-align: center;
+           color: #8B0000;
+           position: relative;
+           transform: scale(0) rotate(0deg);
+           transition: all 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+           box-shadow: 0 0 50px rgba(255, 215, 0, 1);
+           min-width: 400px;
+           max-width: 90%;
+           border: 5px solid #FFD700;
+           overflow: hidden;
+       }
+
+       .winner-modal::before {
+           content: '';
+           position: absolute;
+           top: -10px;
+           left: -10px;
+           right: -10px;
+           bottom: -10px;
+           background: repeating-linear-gradient(
+               45deg,
+               transparent,
+               transparent 10px,
+               rgba(255, 215, 0, 0.3) 10px,
+               rgba(255, 215, 0, 0.3) 20px
+           );
+           border-radius: 35px;
+           z-index: -1;
+           animation: shine 2s linear infinite;
+       }
+
+       .winner-modal-overlay.active .winner-modal {
+           transform: scale(1) rotate(360deg);
+       }
+
+       .winner-modal h2 {
+           font-size: 2.5em;
+           margin-bottom: 20px;
+           text-shadow: 0 0 10px rgba(139, 0, 0, 0.3);
+           animation: bounce 1s ease infinite;
+       }
+
+       .winner-modal .trophy {
+           font-size: 4em;
+           margin: 20px 0;
+           animation: rotate 2s linear infinite;
+       }
+
+       .winner-modal .winner-info {
+           background: rgba(255, 255, 255, 0.9);
+           padding: 20px;
+           border-radius: 15px;
+           margin: 20px 0;
+           box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+           border: 3px solid #FFD700;
+       }
+
+       .winner-modal .winner-info h3 {
+           font-size: 1.8em;
+           margin-bottom: 10px;
+           color: #8B0000;
+       }
+
+       .winner-modal .winner-info p {
+           font-size: 1.2em;
+           color: #555;
+           margin: 5px 0;
+       }
+
+       .winner-modal .close-btn {
+           background: #8B0000;
+           color: #FFD700;
+           border: none;
+           padding: 12px 30px;
+           font-size: 1.1em;
+           border-radius: 25px;
+           cursor: pointer;
+           margin-top: 20px;
+           font-weight: bold;
+           transition: all 0.3s;
+           box-shadow: 0 5px 15px rgba(139, 0, 0, 0.5);
+       }
+
+       .winner-modal .close-btn:hover {
+           transform: scale(1.1);
+           box-shadow: 0 8px 25px rgba(139, 0, 0, 0.7);
+       }
+
+       .reset-btn {
+           background: linear-gradient(45deg, #ff4757, #ff3838) !important;
+           color: #fff !important;
+           box-shadow: 0 5px 15px rgba(255, 71, 87, 0.4) !important;
+       }
+
+       .reset-btn:hover {
+           box-shadow: 0 8px 25px rgba(255, 71, 87, 0.6) !important;
+       }
+
+       .reset-btn:disabled {
+           background: #666 !important;
+           cursor: not-allowed !important;
+           transform: none !important;
+           box-shadow: none !important;
+       }
+
+       /* 导出按钮样式 */
+       .export-btn {
+           background: linear-gradient(45deg, #4CAF50, #45a049) !important;
+           color: #fff !important;
+           box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4) !important;
+           margin-left: 20px !important;
+       }
+
+       .export-btn:hover {
+           box-shadow: 0 8px 25px rgba(76, 175, 80, 0.6) !important;
+       }
+
+       .export-btn:disabled {
+           background: #666 !important;
+           cursor: not-allowed !important;
+           box-shadow: none !important;
+           transform: none !important;
+       }
+
+       .summary-actions {
+           margin-top: 25px;
+           padding-top: 20px;
+           border-top: 3px solid #FFD700;
+           text-align: center;
+       }
+
+       /* 查看汇总按钮样式 */
+       .view-summary-btn {
+           background: linear-gradient(45deg, #2196F3, #1976D2) !important;
+           color: #fff !important;
+           box-shadow: 0 5px 15px rgba(33, 150, 243, 0.4) !important;
+       }
+
+       .view-summary-btn:hover {
+           box-shadow: 0 8px 25px rgba(33, 150, 243, 0.6) !important;
+       }
+
+       /* 全屏汇总显示样式 */
+       .fullscreen-summary {
+           position: fixed !important;
+           top: 0 !important;
+           left: 0 !important;
+           width: 100vw !important;
+           height: 100vh !important;
+           max-height: 100vh !important;
+           margin: 0 !important;
+           padding: 20px !important;
+           border: none !important;
+           border-radius: 0 !important;
+           background: linear-gradient(135deg, #8B0000, #DC143C) !important;
+           backdrop-filter: none !important;
+           box-shadow: none !important;
+           z-index: 1000;
+           overflow-y: auto;
+       }
+
+       /* 全屏模式下的标题样式 */
+       .fullscreen-summary .summary-title {
+           font-size: 3em !important;
+           margin-bottom: 30px !important;
+           padding-bottom: 20px !important;
+           border-bottom: 3px solid #FFD700 !important;
+           position: relative;
+       }
+
+       /* 全屏模式下的统计信息 */
+       .fullscreen-summary .summary-stats {
+           font-size: 1.8em !important;
+           margin-bottom: 30px !important;
+           padding: 20px !important;
+       }
+
+       /* 全屏模式下的部门分组 */
+       .fullscreen-summary .department-group {
+           margin: 25px 0 !important;
+           padding: 25px !important;
+           background: rgba(139, 0, 0, 0.3) !important;
+       }
+
+       /* 全屏模式下的部门标题 */
+       .fullscreen-summary .department-header {
+           font-size: 1.8em !important;
+           margin-bottom: 20px !important;
+           padding-bottom: 15px !important;
+       }
+
+       /* 全屏模式下的中奖者网格 */
+       .fullscreen-summary .department-winners {
+           grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)) !important;
+           gap: 12px !important;
+       }
+
+       /* 全屏模式下的中奖者项 */
+       .fullscreen-summary .winner-item {
+           padding: 15px !important;
+           font-size: 1.1em !important;
+           min-height: 90px !important;
+       }
+
+       /* 全屏模式下的操作按钮区域 */
+       .fullscreen-summary .summary-actions {
+           margin-top: 40px !important;
+           padding-top: 30px !important;
+           border-top: 3px solid #FFD700 !important;
+           position: sticky;
+           bottom: 0;
+           background: linear-gradient(transparent, rgba(139, 0, 0, 0.9));
+           padding-bottom: 20px;
+       }
+
+       /* 全屏切换按钮样式 */
+       .fullscreen-btn {
+           background: linear-gradient(45deg, #9C27B0, #673AB7) !important;
+           color: #fff !important;
+           box-shadow: 0 5px 15px rgba(156, 39, 176, 0.4) !important;
+           margin-left: 20px !important;
+       }
+
+       .fullscreen-btn:hover {
+           box-shadow: 0 8px 25px rgba(156, 39, 176, 0.6) !important;
+       }
+
+       /* 退出全屏按钮 */
+       .exit-fullscreen-btn {
+           position: fixed !important;
+           top: 20px !important;
+           right: 20px !important;
+           z-index: 1001 !important;
+           background: linear-gradient(45deg, #f44336, #d32f2f) !important;
+           padding: 10px 20px !important;
+           font-size: 1em !important;
+       }
+
+       /* 响应式设计 */
+       @media (max-width: 768px) {
+           h1 { font-size: 2.5em; }
+           h1::before, h1::after { display: none; }
+           .summary-title::before, .summary-title::after { display: none; }
+           .progress { position: relative; top: auto; right: auto; margin: 20px auto; }
+       }
+/* 按姓名和工号排序的项样式 */
+.winner-item-sorted {
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    border: 2px solid rgba(255, 215, 0, 0.3);
+    text-align: center;
+    line-height: 1.3;
+    word-break: break-all;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 80px;
+    transition: all 0.3s ease;
+    color: #FFD700;
+    font-weight: bold;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    position: relative;
+}
+
+.winner-item-sorted .winner {
+    background: linear-gradient(135deg, #FFD700, #FFA500);
+    color: #8B0000;
+    border: 2px solid #FFD700;
+    box-shadow: 0 4px 15px rgba(255, 215, 0, 0.6);
+    animation: slideIn 0.5s ease-out;
+}
+
+.winner-item-sorted .winner-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.winner-item-sorted .winner-id {
+    font-size: 1.2em;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.winner-item-sorted .winner-name {
+    font-size: 1.1em;
+    margin-bottom: 5px;
+}
+
+.winner-item-sorted .winner-department {
+    font-size: 0.9em;
+    color: inherit;
+    opacity: 0.8;
+    margin-bottom: 5px;
+}
+
+.winner-item-sorted .winner-prize {
+    font-size: 0.9em;
+    color: #8B0000;
+    font-weight: bold;
+    margin-top: 5px;
+    padding: 3px 8px;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 8px;
+}
+
+/* 序号样式 */
+.winner-index {
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    background: rgba(139, 0, 0, 0.7);
+    color: #FFD700;
+    border-radius: 50%;
+    width: 25px;
+    height: 25px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8em;
+    font-weight: bold;
+}
+
+   </style>
+</head>
+<body>
+    <!-- 添加多个音频元素 -->
+   <!-- <audio id="soundLevel4" preload="auto"><source src="sounds/level4.mp3"></audio>
+   <audio id="soundLevel3" preload="auto"><source src="sounds/level3.mp3"></audio>
+   <audio id="soundLevel2" preload="auto"><source src="sounds/level2.mp3"></audio>
+   <audio id="soundLevel1" preload="auto"><source src="sounds/level1.mp3"></audio> -->
+
+   <!-- 新年装饰 -->
+   <div class="decoration lantern" style="top:10%; left: 5%;"></div>
+   <div class="decoration lantern" style="top:10%; right: 5%;"></div>
+   <div class="decoration lantern" style="bottom: 10%; left: 5%;"></div>
+   <div class="decoration lantern" style="bottom: 10%; right: 5%;"></div>
+   <div class="decoration firework" style="top: 20%; left: 10%; animation-delay: 0s;"></div>
+   <div class="decoration firework" style="top: 30%; right: 15%; animation-delay: 0.5s;"></div>
+   <div class="decoration firework" style="bottom:20%; left: 20%; animation-delay: 1s;"></div>
+
+   <div class="progress" title="鼠标悬停查看详情">
+       <h3>🎊 抽奖进度</h3>
+       <div id="progressList"></div>
+   </div>
+
+   <div class="container">
+       <div id="step0" class="stage active">
+           <h1>🎊 研发部年会抽奖系统 🎊</h1>
+           <div id="uploadArea">
+               <input type="file" id="csvInput" accept=".csv">
+               <label for="csvInput" class="upload-btn">📁 选择员工名单CSV文件</label>
+               <p style="margin-top: 20px; color: #FFD700; font-size: 1.1em;">📋 文件格式：工号,姓名,部门（每行一个）</p>
+           </div>
+       </div>
+
+       <div id="step1" class="stage">
+           <div class="award-info" id="awardInfo">
+               <h2 id="currentAward"></h2>
+               <p id="awardProgress"></p>
+               <p id="prizeInventory" style="font-size: 0.8em; margin-top: 10px; color: #FFA500;"></p>
+           </div>
+           <div id="display"></div>
+           
+           <!-- 汇总显示区域 -->
+           <div id="awardSummary" class="award-summary" style="display: none;">
+               <h3 class="summary-title" id="summaryTitle"></h3>
+               <!-- <div class="summary-stats" id="summaryStats"></div> -->
+               <div id="summaryContent" class="summary-content"></div>
+               <div class="summary-actions">
+                   <button onclick="nextAward()">🎊 确认并进入下一阶段</button>
+                   <!-- <button onclick="exportCurrentAward()" class="export-btn" id="exportCurrentAwardBtn" style="display:none;">📤 导出当前奖项名单</button> -->
+                   <!-- <button onclick="toggleFullscreenSummary()" class="fullscreen-btn">🔍 全屏显示</button> -->
+               </div>
+           </div>
+           
+           <div id="step1Controls">
+               <button id="drawBtn" onclick="startDraw()">🎯 开始抽奖</button>
+               <button id="viewSummaryBtn" onclick="showAwardSummary()" class="view-summary-btn" style="display:none">📊 查看汇总</button>
+               <button id="nextBtn" onclick="nextAward()" style="display:none">🎊 进入下一阶段</button>
+               <button onclick="exportWinners()" id="exportBtn" style="display:none">📤 导出全部名单</button>
+               <button onclick="resetCurrentAward()" id="resetBtn" class="reset-btn" style="display:none">🔄 重置当前奖项</button>
+               <!-- 每次抽取后可立即导出 -->
+               <!-- <button onclick="exportCurrentAward()" id="exportPartialBtn" class="export-btn" style="display:none;">📤 导出当前已抽名单</button> -->
+           </div>
+       </div>
+
+       <div id="step2" class="stage">
+           <div class="award-info" id="specialAwardInfo">
+               <h2 id="specialAward"></h2>
+               <p id="remainingInfo">剩余未中奖员工：<span id="remainingCount"></span>人</p>
+               <p id="specialPrizeInventory" style="font-size: 0.8em; margin-top: 10px; color: #FFA500;"></p>
+           </div>
+           <div id="numberDisplay"></div>
+           
+           <!-- 特殊抽奖汇总显示区域 -->
+           <div id="specialAwardSummary" class="award-summary" style="display: none;">
+               <h3 class="summary-title" id="specialSummaryTitle"></h3>
+               <!-- <div class="summary-stats" id="specialSummaryStats"></div> -->
+               <div id="specialSummaryContent" class="summary-content"></div>
+               <div class="summary-actions">
+                   <button onclick="nextAward()">🎊 确认并进入下一阶段</button>
+                   <button onclick="exportCurrentAward()" class="export-btn" id="exportSpecialCurrentAwardBtn" style="display:none;">📤 导出当前奖项名单</button>
+                   <button onclick="toggleFullscreenSummary()" class="fullscreen-btn">🔍 全屏显示</button>
+               </div>
+           </div>
+           
+           <div class="input-group" id="specialInputGroup">
+               <input type="number" id="inputNumber" placeholder="输入抽中的号码" min="1">
+               <button onclick="checkWinner()" id="checkWinnerBtn">🎉 确认中奖</button>
+               <button id="specialViewSummaryBtn" onclick="showSpecialAwardSummary()" class="view-summary-btn" style="display:none">📊 查看汇总</button>
+               <button onclick="nextAward()" id="specialNextBtn" style="display:none">🎊 进入下一阶段</button>
+               <button onclick="exportWinners()" id="specialExportBtn" style="display:none">📤 导出全部名单</button>
+               <button onclick="resetCurrentAward()" id="specialResetBtn" class="reset-btn" style="display:none">🔄 重置当前奖项</button>
+           </div>
+       </div>
+
+       <div id="step3" class="stage">
+           <h1>🎊 抽奖活动圆满结束！🎊</h1>
+           <div style="font-size: 1.5em; margin: 30px 0;">
+               <p>🎉 所有奖项已抽取完毕 🎉</p>
+               <p>🏆 中奖名单已准备就绪 🏆</p>
+           </div>
+           <button onclick="exportWinners()">📤 下载完整中奖名单</button>
+           <button onclick="location.reload()" style="background: #666;">🔄 重新开始</button>
+       </div>
+   </div>
+
+   <div class="winner-modal-overlay" id="winnerModal">
+       <div class="winner-modal">
+           <div class="trophy">🏆</div>
+           <h2>🎊 恭喜中奖！ 🎊</h2>
+           <div class="winner-info">
+               <h3 id="modalAwardName"></h3>
+               <p><strong>工号：</strong><span id="modalWinnerId"></span></p>
+               <p><strong>姓名：</strong><span id="modalWinnerName"></span></p>
+               <p><strong>部门：</strong><span id="modalWinnerDept"></span></p>
+               <p><strong>奖品：</strong><span id="modalWinnerPrize"></span></p>
+           </div>
+           <button class="close-btn" onclick="closeWinnerModal()">🎉 确认</button>
+       </div>
+   </div>
+
+   <script>
+       let employees = [];
+       let allWinners = { '四等奖': [], '三等奖': [], '二等奖': [], '一等奖': [], '特等奖': [], '超级幸运奖': [] };
+       let currentStep = 0;
+       let currentAwardIndex = 0;
+       let isDrawing = false;
+       let numberPool = [];
+       let isFullscreen = false;
+       let currentBatch = 1;
+       let totalBatches = 1;
+
+       // 新增：滚动控制变量
+       let rollingInterval = null;
+       let currentDrawCount = 0;
+       let isRolling = false;
+       
+       // 奖品配置 - 精确控制每种奖品数量
+       const prizeConfig = {
+           '四等奖': [{name: '耳机', count: 200}],
+           '三等奖': [
+               {name: '吹风机', count: 25},
+               {name: '扫地机', count: 25},
+               {name: '吸尘器', count: 30}
+           ],
+           '二等奖': [
+               {name: '手机', count: 20},
+               {name: '电脑', count: 10},
+               {name: '无人机', count: 10}
+           ],
+           '一等奖': [{name: '一等奖奖品', count: 5}],
+           '特等奖': [{name: '特等奖奖品', count: 1}],
+           '超级幸运奖': [{name: '超级幸运奖品', count: 1}] 
+       };
+       
+       // 当前剩余奖品
+       let remainingPrizes = JSON.parse(JSON.stringify(prizeConfig));
+       let isSoundEnabled = true;
+       // 奖项配置
+       const awards = [
+           {name: '四等奖', quota: 200, batch: 50, type: 'normal'},
+           {name: '三等奖', quota: 80, batch: 40, type: 'normal'},
+           {name: '二等奖', quota: 40, batch: 20, type: 'normal'},
+           {name: '一等奖', quota: 5, type: 'special'},
+           {name: '特等奖', quota: 1, type: 'special'},
+           {name: '超级幸运奖', quota: 1, type: 'special'}
+       ];
+
+       function initProgress() {
+           const progressList = document.getElementById('progressList');
+           progressList.innerHTML = awards.map((award, index) => `
+               <div class="progress-item ${index === currentAwardIndex ? 'current' : 'pending'}" id="progress-${index}">
+                   ${award.name} (**名)
+               </div>
+           `).join('');
+       }
+
+    //    function updateProgress() {
+    //        awards.forEach((award, index) => {
+    //            const item = document.getElementById(`progress-${index}`);
+    //            if (index < currentAwardIndex) {
+    //                item.className = 'progress-item completed';
+    //            } else if (index === currentAwardIndex) {
+    //                item.className = 'progress-item current';
+    //            } else {
+    //                item.className = 'progress-item pending';
+    //            }
+    //        });
+    //    }
+       function updateProgress() {
+            awards.forEach((award, index) => {
+                const item = document.getElementById(`progress-${index}`);
+                if (index < currentAwardIndex) {
+                    item.className = 'progress-item completed';
+                    // 已完成的奖项显示具体数量
+                    item.textContent = `${award.name} (${award.quota}名)`;
+                } else if (index === currentAwardIndex) {
+                    item.className = 'progress-item current';
+                    // 当前奖项显示具体数量
+                    item.textContent = `${award.name} (${award.quota}名)`;
+                } else {
+                    item.className = 'progress-item pending';
+                    // 未开始的奖项显示 **名
+                    item.textContent = `${award.name} (**名)`;
+                }
+            });
+        }
+
+       document.getElementById('csvInput').addEventListener('change', function(e) {
+           const file = e.target.files[0];
+           if (!file) return;
+
+           const reader = new FileReader();
+           reader.onload = function(event) {
+               const text = event.target.result;
+               const lines = text.split(/\r?\n/).filter(line => line.trim().length > 0);
+               
+               employees = [];
+               for (let line of lines) {
+                   const parts = line.split(',');
+                   if (parts.length >= 3) {
+                       const id = parts[0].trim();
+                       const name = parts[1].trim();
+                       const department = parts[2].trim();
+                       if (id && name && department) {
+                           employees.push({id, name, department});
+                       }
+                   }
+               }
+               
+               if (employees.length === 0) {
+                   alert('文件内容为空或格式错误！请确保格式为：工号,姓名,部门');
+                   return;
+               }
+               
+               if (employees.length < 500) {
+                   alert(`警告：员工人数(${employees.length})少于预期，请检查文件！`);
+               }
+               
+               console.log(`成功加载 ${employees.length} 名员工`);
+               currentStep = 1;
+               initProgress();
+               showCurrentAward();
+           };
+           reader.readAsText(file, 'UTF-8');
+       });
+
+       function showCurrentAward() {
+           document.querySelectorAll('.stage').forEach(el => el.classList.remove('active'));
+
+           if (currentAwardIndex >= awards.length) {
+               document.getElementById('step3').classList.add('active');
+               return;
+           }
+
+           const award = awards[currentAwardIndex];
+
+           if (award.type === 'normal') {
+               document.getElementById('step1').classList.add('active');
+               document.getElementById('currentAward').textContent = award.name;
+               updateAwardProgress();
+               updatePrizeInventory();
+               document.getElementById('display').innerHTML = '';
+               document.getElementById('drawBtn').style.display = 'inline-block';
+               document.getElementById('viewSummaryBtn').style.display = 'none';
+               document.getElementById('nextBtn').style.display = 'none';
+               document.getElementById('exportBtn').style.display = 'none';
+               document.getElementById('resetBtn').style.display = 'inline-block';
+            //    document.getElementById('exportPartialBtn').style.display = 'none';
+               document.getElementById('awardSummary').style.display = 'none';
+               document.getElementById('step1Controls').style.display = 'block';
+               document.getElementById('awardInfo').style.display = 'block';
+               document.getElementById('display').style.setProperty('display', 'grid', 'important');
+           } else {
+               initSpecialStage(award);
+           }
+
+           updateProgress();
+       }
+
+       function updateAwardProgress() {
+           const award = awards[currentAwardIndex];
+           const currentCount = allWinners[award.name].length;
+           document.getElementById('awardProgress').textContent = `已抽取：${currentCount}/${award.quota} 名`;
+       }
+       
+       // 更新奖品库存显示
+       function updatePrizeInventory() {
+           const award = awards[currentAwardIndex];
+           const prizes = remainingPrizes[award.name];
+           let inventoryText = '奖品库存：';
+           
+           prizes.forEach((prize, index) => {
+               if (index > 0) inventoryText += ' | ';
+               inventoryText += `${prize.name}: ${prize.count}个`;
+           });
+           
+           document.getElementById('prizeInventory').textContent = inventoryText;
+       }
+
+       // 获取随机奖品
+       function getRandomPrize(awardName) {
+           const prizes = remainingPrizes[awardName];
+           const availablePrizes = prizes.filter(p => p.count > 0);
+           
+           if (availablePrizes.length === 0) {
+               return '奖品已抽完';
+           }
+           
+           // 按库存数量加权随机（库存多的奖品中奖概率高）
+           const totalWeight = availablePrizes.reduce((sum, p) => sum + p.count, 0);
+           let random = Math.random() * totalWeight;
+           
+           for (let prize of availablePrizes) {
+               random -= prize.count;
+               if (random <= 0) {
+                   prize.count--;
+                   return prize.name;
+               }
+           }
+           
+           return availablePrizes[0].name;
+       }
+
+ // 修改：开始抽奖函数 - 只负责启动滚动
+ function startDraw() {
+           if (isRolling || isDrawing) return;
+
+           const award = awards[currentAwardIndex];
+           const remaining = award.quota - allWinners[award.name].length;
+           currentDrawCount = Math.min(award.batch, remaining);
+
+           if (currentDrawCount <= 0) {
+               alert(`${award.name}已抽完！`);
+               return;
+           }
+
+           if (employees.length < currentDrawCount) {
+               alert(`剩余员工不足，无法抽取${currentDrawCount}名！`);
+               return;
+           }
+
+           isRolling = true;
+           isDrawing = true;
+           const display = document.getElementById('display');
+           const drawBtn = document.getElementById('drawBtn');
+
+           // 清空并设置网格布局
+           display.innerHTML = '';
+           display.classList.add('rolling');
+
+           // 根据奖项设置列数
+           let columnCount = 8;
+           if (award.name === '四等奖') columnCount = 10;
+           else if (award.name === '三等奖') columnCount = 8;
+           else if (award.name === '二等奖') columnCount = 5;
+
+           display.style.gridTemplateColumns = `repeat(${columnCount}, 1fr)`;
+
+           // 生成大量滚动项（创建无缝滚动效果）
+           const totalItems = columnCount * 50;
+
+           for (let i = 0; i < totalItems; i++) {
+               const randomIndex = Math.floor(Math.random() * employees.length);
+               const emp = employees[randomIndex];
+               const rollItem = document.createElement('div');
+               rollItem.className = 'roll-item';
+               rollItem.innerHTML = `
+                   ${emp.id}-${emp.name}
+                   <div class="department-info">${emp.department}</div>
+               `;
+               display.appendChild(rollItem);
+           }
+
+           // 关键修改：将按钮改为"停止"
+           drawBtn.textContent = '⏹️ 停止抽奖';
+           drawBtn.className = 'stop-btn';
+           drawBtn.onclick = stopDraw;
+       }
+
+       // 新增：停止抽奖函数 - 手动停止并显示结果
+       function stopDraw() {
+           if (!isRolling) return;
+
+           const display = document.getElementById('display');
+           const drawBtn = document.getElementById('drawBtn');
+           const award = awards[currentAwardIndex];
+
+           // 停止滚动
+           clearInterval(rollingInterval);
+           isRolling = false;
+           display.classList.remove('rolling');
+           display.innerHTML = '';
+
+           // 抽取中奖者
+           const winners = drawWinners(currentDrawCount);
+           allWinners[award.name] = allWinners[award.name].concat(winners);
+           showWinners(winners);
+           updateAwardProgress();
+           updatePrizeInventory();
+           
+           // 每次抽取后显示"导出当前已抽名单"按钮
+        //    document.getElementById('exportPartialBtn').style.display = 'inline-block';
+           
+           // 恢复按钮状态
+           drawBtn.textContent = '🎯 继续抽奖';
+           drawBtn.className = '';
+           drawBtn.onclick = startDraw;
+           isDrawing = false;
+           
+           // 如果已抽完，隐藏抽奖按钮，显示查看汇总按钮
+           if (allWinners[award.name].length >= award.quota) {
+               drawBtn.style.display = 'none';
+               document.getElementById('viewSummaryBtn').style.display = 'inline-block';
+           }
+           
+            // 自动导出当前批次结果（静默模式）
+            setTimeout(() => {
+                exportCurrentAward(true);
+            }, 500);
+       }
+
+
+       function drawWinners(count) {
+           const winners = [];
+           const award = awards[currentAwardIndex];
+           for (let i = 0; i < count; i++) {
+               if (employees.length === 0) break;
+               const index = Math.floor(Math.random() * employees.length);
+               const winner = employees.splice(index, 1)[0];
+               
+               // 获取奖品
+               winner.prize = getRandomPrize(award.name);
+               
+               winners.push(winner);
+           }
+           return winners;
+       }
+
+       // 显示中奖者（网格布局）
+       function showWinners(winners) {
+           const display = document.getElementById('display');
+           display.innerHTML = winners.map((emp, index) => `
+               <div class="winner-item" style="animation-delay: ${index * 0.1}s">
+                   ${emp.id} - ${emp.name}
+                   <div class="department-info">${emp.department}</div>
+                   <div style="color: #8B0000; font-weight: bold; margin-top: 5px; font-size: 0.9em;">${emp.prize}</div>
+               </div>
+           `).join('');
+
+           // 根据中奖人数调整字体大小
+           const count = winners.length;
+           if (count > 40) {
+               display.style.fontSize = '1em';
+           } else if (count > 20) {
+               display.style.fontSize = '1.3em';
+           } else if (count > 10) {
+               display.style.fontSize = '1.5em';
+           } else {
+               display.style.fontSize = '1.2em';
+           }
+           toggleFullscreenSummary();
+       }
+
+       // 按部门分组汇总显示（完全隐藏抽奖区域）
+function showAwardSummary() {
+    const award = awards[currentAwardIndex];
+    const winners = allWinners[award.name];
+
+    // 完全隐藏抽奖区域
+    document.getElementById('awardInfo').style.display = 'none';
+    document.getElementById('display').style.setProperty('display', 'none', 'important');
+    document.getElementById('step1Controls').style.display = 'none';
+
+    // 显示汇总区域
+    const summaryDiv = document.getElementById('awardSummary');
+    summaryDiv.style.display = 'block'; 
+
+    document.getElementById('summaryTitle').textContent = `${award.name} - 中奖名单汇总（${winners.length}人）`;
+    // document.getElementById('summaryStats').textContent = `共抽取 ${winners.length} 名中奖者`;
+
+    // 按工号排序（数字排序）
+    winners.sort((a, b) => {
+        // 将工号转换为数字进行比较
+        const idA = parseInt(a.id) || a.id;
+        const idB = parseInt(b.id) || b.id;
+        return idA - idB;
+    });
+
+    // 生成按工号排序的显示
+    let contentHTML = '';
+    let globalIndex = 1;
+
+    winners.forEach(w => {
+        contentHTML += `
+            <div class="winner-item-sorted">
+                <div class="winner-index">${globalIndex}.</div>
+                <div class="winner-info">
+                    <div class="winner-id">${w.id}</div>
+                    <div class="winner-name">${w.name}</div>
+                    <div class="winner-department">${w.department}</div>
+                    <div class="winner-prize">${w.prize}</div>
+                </div>
+            </div>
+        `;
+        globalIndex++;
+    });
+
+    const content = document.getElementById('summaryContent');
+    content.innerHTML = contentHTML;
+
+    // 显示导出当前奖项按钮
+    document.getElementById('exportCurrentAwardBtn').style.display = 'inline-block';
+}
+
+       function initSpecialStage(award) {
+           document.getElementById('step2').classList.add('active');
+           document.getElementById('specialAward').textContent = award.name;
+           document.getElementById('remainingCount').textContent = employees.length;
+           updateSpecialPrizeInventory();
+
+           document.getElementById('inputNumber').disabled = false;
+           document.getElementById('checkWinnerBtn').disabled = false;
+           document.getElementById('specialViewSummaryBtn').style.display = 'none';
+
+           document.getElementById('specialNextBtn').style.display = 'none';
+           document.getElementById('specialExportBtn').style.display = 'none';
+           document.getElementById('specialResetBtn').style.display = 'inline-block';
+           document.getElementById('specialAwardSummary').style.display = 'none';
+           document.getElementById('specialInputGroup').style.display = 'block';
+           document.getElementById('specialAwardInfo').style.display = 'block';
+           document.getElementById('numberDisplay').style.display = 'grid';
+
+           if (numberPool.length === 0) {
+               numberPool = employees.map((emp, index) => ({
+                   number: index + 1,
+                   id: emp.id,
+                   name: emp.name,
+                   department: emp.department
+               }));
+               console.log(`生成编号池：共 ${numberPool.length} 个编号`);
+           }
+
+           const container = document.getElementById('numberDisplay');
+           container.innerHTML = '';
+
+           const remainingPool = numberPool.filter(item => 
+               employees.some(emp => emp.id === item.id && emp.name === item.name)
+           );
+
+           remainingPool.forEach(item => {
+               const numberItem = document.createElement('div');
+               numberItem.className = 'number-item';
+               numberItem.dataset.number = item.number;
+               numberItem.dataset.id = item.id;
+               numberItem.dataset.name = item.name;
+               numberItem.dataset.department = item.department;
+               numberItem.innerHTML = `
+                   <div style="font-size: 1.5em; font-weight: bold; color: #FFD700;">${item.number}</div>
+                   <div style="font-size: 0.9em; margin-top: 5px;">${item.id}</div>
+                   <div style="font-size: 0.8em; margin-top: 3px; color: #aaa;">${item.name}</div>
+                   <div class="department-info">${item.department}</div>
+               `;
+               container.appendChild(numberItem);
+           });
+
+           document.getElementById('inputNumber').value = '';
+       }
+       
+       // 更新特殊抽奖奖品库存显示
+       function updateSpecialPrizeInventory() {
+           const award = awards[currentAwardIndex];
+           const prizes = remainingPrizes[award.name];
+           let inventoryText = '奖品库存：';
+           
+           prizes.forEach((prize, index) => {
+               if (index > 0) inventoryText += ' | ';
+               inventoryText += `${prize.name}: ${prize.count}个`;
+           });
+           
+           document.getElementById('specialPrizeInventory').textContent = inventoryText;
+       }
+        // 备用音效生成器（无需音频文件）
+       function createBeepSound(frequency = 800, duration = 200) {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration / 1000);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + duration / 1000);
+        }
+
+        // 修改 playWinSound 函数
+        // function playWinSound() {
+        //     if (!isSoundEnabled) return;
+            
+        //     // 如果有音频文件则播放，否则用备用音效
+        //     if (winSound.src && winSound.src !== window.location.href) {
+        //         winSound.currentTime = 0;
+        //         winSound.play().catch(e => {
+        //             console.log('音频播放失败，使用备用音效');
+        //             createBeepSound(1000, 300);
+        //         });
+        //     } else {
+        //         // 生成成功音效（升调）
+        //         createBeepSound(600, 100);
+        //         setTimeout(() => createBeepSound(800, 100), 100);
+        //         setTimeout(() => createBeepSound(1000, 150), 200);
+        //     }
+        // }
+
+       function checkWinner() {
+           const input = document.getElementById('inputNumber');
+           const number = parseInt(input.value);
+
+           if (isNaN(number) || number < 1) {
+               alert('请输入有效的号码');
+               return;
+           }
+
+           const item = document.querySelector(`[data-number="${number}"]`);
+           if (!item) {
+               alert('该号码不存在或已中奖！');
+               return;
+           }
+
+           item.classList.add('highlight');
+
+           const winnerId = item.dataset.id;
+           const winnerName = item.dataset.name;
+           const awardName = awards[currentAwardIndex].name;
+           
+           // 获取奖品
+           const prize = getRandomPrize(awardName);
+           
+           allWinners[awardName].push({
+               id: winnerId,
+               name: winnerName,
+               department: item.dataset.department,
+               prize: prize
+           });
+
+           const index = employees.findIndex(emp => 
+               emp.id === winnerId && emp.name === winnerName
+           );
+           if (index > -1) {
+               employees.splice(index, 1);
+           }
+
+           const poolIndex = numberPool.findIndex(p => p.number === number);
+           if (poolIndex > -1) {
+               numberPool[poolIndex].awarded = true;
+               numberPool[poolIndex].awardName = awardName;
+           }
+
+           document.getElementById('remainingCount').textContent = employees.length;
+           updateSpecialPrizeInventory();
+           input.value = '';
+
+        //    if (allWinners[awardName].length >= awards[currentAwardIndex].quota) {
+        //        document.getElementById('inputNumber').disabled = true;
+        //        document.getElementById('checkWinnerBtn').disabled = true;
+        //        document.getElementById('specialViewSummaryBtn').style.display = 'inline-block';
+        //    }
+        // 改为：
+            const award = awards[currentAwardIndex];
+            showWinnerModal(awardName, winnerId, winnerName, prize);
+            // playWinSound();
+            if (allWinners[award.name].length === award.quota) {
+                // 第一次达到quota，显示汇总按钮
+                document.getElementById('specialViewSummaryBtn').style.display = 'inline-block';
+                setTimeout(() => {
+                    alert(`至此，${award.name}的${award.quota}个正式名额即将抽完！您可以继续抽奖抽取额外名额，或点击"查看汇总"查看中奖名单。`);
+                }, 2000);
+            }
+       }
+
+      function showSpecialAwardSummary() {
+    const award = awards[currentAwardIndex];
+    const winners = allWinners[award.name];
+
+    // 完全隐藏抽奖区域
+    document.getElementById('specialAwardInfo').style.display = 'none';
+    document.getElementById('numberDisplay').style.display = 'none';
+    document.getElementById('specialInputGroup').style.display = 'none';
+
+    // 显示汇总区域
+    const summaryDiv = document.getElementById('specialAwardSummary');
+    summaryDiv.style.display = 'block';
+    toggleFullscreenSummary();
+
+    document.getElementById('specialSummaryTitle').textContent = `${award.name} - 中奖名单汇总（${winners.length}人）`;
+    // document.getElementById('specialSummaryStats').textContent = `共抽取 ${winners.length} 名中奖者`;
+
+    // 按姓名和工号排序
+    winners.sort((a, b) => {
+        if (a.name !== b.name) {
+            return a.name.localeCompare(b.name);
+        }
+        return a.id.localeCompare(b.id);
+    });
+
+    // 生成按姓名和工号排序的显示
+    let contentHTML = '';
+    let globalIndex = 1;
+
+    winners.forEach(w => {
+        contentHTML += `
+            <div class="winner-item-sorted">
+                <div class="winner-index">${globalIndex}.</div>
+                <div class="winner-info">
+                    <div class="winner-id">${w.id}</div>
+                    <div class="winner-name">${w.name}</div>
+                    <div class="winner-department">${w.department}</div>
+                    <div class="winner-prize">${w.prize}</div>
+                </div>
+            </div>
+        `;
+        globalIndex++;
+    });
+
+    const content = document.getElementById('specialSummaryContent');
+    content.innerHTML = contentHTML;
+
+    // 显示导出当前奖项按钮
+    document.getElementById('exportSpecialCurrentAwardBtn').style.display = 'inline-block';
+}
+
+       function showWinnerModal(awardName, winnerId, winnerName, prize) {
+           const winner = employees.find(e => e.id === winnerId) || numberPool.find(n => n.id === winnerId);
+
+           document.getElementById('modalAwardName').textContent = awardName;
+           document.getElementById('modalWinnerId').textContent = winnerId;
+           document.getElementById('modalWinnerName').textContent = winnerName;
+           document.getElementById('modalWinnerDept').textContent = winner?.department || '未知部门';
+           document.getElementById('modalWinnerPrize').textContent = prize;
+
+           const modal = document.getElementById('winnerModal');
+           modal.classList.add('active');
+           toggleFullscreenSummary();
+       }
+
+       function closeWinnerModal() {
+           const modal = document.getElementById('winnerModal');
+           modal.classList.remove('active');
+       }
+
+       function nextAward() {
+
+           exportCurrentAward(true);
+   
+           // 隐藏汇总区域和导出按钮
+           document.getElementById('awardSummary').style.display = 'none';
+           document.getElementById('specialAwardSummary').style.display = 'none';
+        //    document.getElementById('exportCurrentAwardBtn').style.display = 'none';
+           document.getElementById('exportSpecialCurrentAwardBtn').style.display = 'none';
+
+           // 隐藏部分导出按钮
+        //    document.getElementById('exportPartialBtn').style.display = 'none';
+
+           // 恢复显示原有元素
+           const award = awards[currentAwardIndex];
+           if (award.type === 'normal') {
+               document.getElementById('awardInfo').style.display = 'block';
+               document.getElementById('display').style.setProperty('display', 'grid', 'important');
+               document.getElementById('step1Controls').style.display = 'block';
+               document.getElementById('resetBtn').style.display = 'inline-block';
+               document.getElementById('viewSummaryBtn').style.display = 'none';
+           } else {
+               initSpecialStage(award);
+           }
+
+           currentAwardIndex++;
+           showCurrentAward();
+       }
+
+       function resetCurrentAward() {
+           if (currentAwardIndex >= awards.length) return;
+
+           const award = awards[currentAwardIndex];
+           const currentWinners = allWinners[award.name];
+
+           if (currentWinners.length === 0) {
+               alert('当前奖项还没有中奖者，无需重置！');
+               return;
+           }
+
+           if (!confirm(`确定要重置${award.name}吗？这将清除当前奖项的${currentWinners.length}名中奖者并重新开始抽奖。`)) {
+               return;
+           }
+
+           // 将中奖者重新加回员工列表
+           employees.push(...currentWinners);
+
+           // 清除当前奖项的中奖者记录
+           allWinners[award.name] = [];
+
+           // 重置奖品库存
+           remainingPrizes[award.name] = JSON.parse(JSON.stringify(prizeConfig[award.name]));
+
+           // 特殊抽奖需要重置numberPool状态
+           if (award.type === 'special') {
+               currentWinners.forEach(winner => {
+                   const poolItem = numberPool.find(item => 
+                       item.id === winner.id && item.name === winner.name
+                   );
+                   if (poolItem) {
+                       poolItem.awarded = false;
+                       delete poolItem.awardName;
+                   }
+               });
+           }
+
+           // 重置UI状态
+           if (award.type === 'normal') {
+               const drawBtn = document.getElementById('drawBtn');
+               drawBtn.style.display = 'inline-block';
+               drawBtn.textContent = '🎯 开始抽奖';
+               drawBtn.className = '';
+               drawBtn.onclick = startDraw;
+               isDrawing = false;
+               isRolling = false;
+               document.getElementById('display').innerHTML = '';
+               document.getElementById('drawBtn').style.display = 'inline-block';
+               document.getElementById('viewSummaryBtn').style.display = 'none';
+               document.getElementById('nextBtn').style.display = 'none';
+               document.getElementById('exportBtn').style.display = 'none';
+            //    document.getElementById('exportPartialBtn').style.display = 'none';
+               document.getElementById('drawBtn').disabled = false;
+               document.getElementById('drawBtn').textContent = '开始抽奖';
+               isDrawing = false;
+               document.getElementById('awardSummary').style.display = 'none';
+               document.getElementById('step1Controls').style.display = 'block';
+               document.getElementById('awardInfo').style.display = 'block';
+               document.getElementById('display').style.setProperty('display', 'grid', 'important');
+               updatePrizeInventory();
+           } else {
+               initSpecialStage(award);
+               document.getElementById('specialAwardSummary').style.display = 'none';
+               document.getElementById('specialInputGroup').style.display = 'block';
+               document.getElementById('specialAwardInfo').style.display = 'block';
+           }
+
+           updateProgress();
+           updateAwardProgress();
+           alert(`${award.name}已重置，可以重新开始抽奖！`);
+       }
+
+       // 导出当前奖项名单（支持部分导出）
+       function exportCurrentAward(silent = false) {
+           const award = awards[currentAwardIndex];
+           const winners = allWinners[award.name];
+
+           if (!winners || winners.length === 0) {
+            if (!silent)  alert('当前奖项还没有中奖者！');
+               return;
+           }
+
+           // 导出当前奖项的已抽取部分
+           let csvContent = '奖项,序号,工号,姓名,部门,奖品\n';
+           csvContent += `${award.name} (已抽取 ${winners.length}/${award.quota} 名)\n`;
+           winners.forEach((winner, index) => {
+               csvContent += `${award.name},${index + 1},${winner.id},${winner.name},${winner.department},${winner.prize}\n`;
+           });
+
+           const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+           const link = document.createElement('a');
+           link.href = URL.createObjectURL(blob);
+
+           const timestamp = new Date().toLocaleString().replace(/[/:]/g, '-');
+           link.download = `${award.name}_中奖名单_${winners.length}人_${timestamp}.csv`;
+           link.click();
+           if (!silent) {
+            alert(`${award.name}当前中奖名单已导出！（已抽取 ${winners.length}/${award.quota} 名）`);
+           }
+       }
+
+       // 导出全部奖项名单
+       function exportWinners() {
+           let csvContent = '奖项,序号,工号,姓名,部门,奖品\n';
+           awards.forEach(award => {
+               csvContent += `\n${award.name}\n`;
+               allWinners[award.name].forEach((winner, index) => {
+                   csvContent += `${award.name},${index + 1},${winner.id},${winner.name},${winner.department},${winner.prize}\n`;
+               });
+           });
+
+           const totalWinners = awards.reduce((sum, award) => sum + allWinners[award.name].length, 0);
+           csvContent += `\n\n统计信息\n`;
+           csvContent += `总中奖人数,${totalWinners}\n`;
+           csvContent += `未中奖人数,${employees.length}\n`;
+
+           const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+           const link = document.createElement('a');
+           link.href = URL.createObjectURL(blob);
+           link.download = `年会完整中奖名单_${new Date().toLocaleDateString()}.csv`;
+           link.click();
+
+           alert('完整中奖名单已导出！');
+       }
+
+       // 全屏切换功能
+       function toggleFullscreenSummary() {
+           const award = awards[currentAwardIndex];
+           const summaryDiv = award.type === 'normal' 
+               ? document.getElementById('awardSummary')
+               : document.getElementById('specialAwardSummary');
+           
+           if (!isFullscreen) {
+               // 进入全屏
+               summaryDiv.classList.add('fullscreen-summary');
+               
+               // 创建退出按钮
+               const exitBtn = document.createElement('button');
+               exitBtn.className = 'exit-fullscreen-btn';
+               exitBtn.textContent = '❌ 退出全屏';
+               exitBtn.onclick = toggleFullscreenSummary;
+               summaryDiv.appendChild(exitBtn);
+               
+               isFullscreen = true;
+           } 
+       }
+   </script>
+</body>
+</html>
