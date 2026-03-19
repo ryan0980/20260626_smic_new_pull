@@ -1,0 +1,38 @@
+name: Pull and Save vLLM (Super Clean Version)
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Maximize Disk Space (Aggressive)
+        run: |
+          # 极其暴力的清理：删除几乎所有预装软件
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /usr/local/share/boost /usr/local/lib/node_modules /usr/share/swift /usr/local/share/powershell /usr/local/bin/aliyun /usr/local/bin/azcopy
+          # 删除所有不需要的 Docker 镜像和容器缓存
+          docker system prune -af
+          df -h /
+
+      - name: Pull Image
+        run: |
+          docker pull vllm/vllm-openai:latest
+
+      - name: Save Image to Multiple Parts
+        run: |
+          # 创建输出目录
+          mkdir -p ./output
+          
+          # 【核心逻辑】：直接使用 docker save 压缩并切分成 2GB 的小块
+          # 这样可以边导边切，防止单个大文件瞬间撑爆磁盘
+          docker save vllm/vllm-openai:latest | gzip -1 | split -b 2000M - ./output/vllm_part_
+          
+          echo "切分打包完成："
+          ls -lh ./output/
+
+      - name: Upload Parts
+        uses: actions/upload-artifact@v4
+        with:
+          name: vllm-multi-parts
+          path: ./output/vllm_part_*
+          retention-days: 1
