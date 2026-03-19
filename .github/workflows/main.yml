@@ -1,30 +1,48 @@
-name: Pull and Save Large Image
+name: Pull and Save vLLM Image (High Disk Space)
 on:
-  workflow_dispatch: # 允许手动点击运行
+  workflow_dispatch: # 支持手动点击运行
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Free Disk Space # 清理服务器空间，确保有足够地方放 7GB 镜像
+      - name: Maximize Agent Disk Space
         run: |
+          echo "=== 正在进行深度磁盘清理... ==="
+          # 移除不需要的巨型工具包 (约可腾出 20GB+)
           sudo rm -rf /usr/share/dotnet
           sudo rm -rf /usr/local/lib/android
           sudo rm -rf /opt/ghc
+          sudo rm -rf /usr/local/share/boost
+          sudo rm -rf /usr/local/lib/node_modules
+          sudo rm -rf "$AGENT_TOOLSDIRECTORY"
+          
+          # 清理 Docker 冗余数据
+          docker system prune -af
+          
+          echo "=== 清理完成，当前磁盘状态： ==="
+          df -h /
 
       - name: Pull Docker Image
         run: |
+          echo "正在拉取 vLLM 镜像..."
+          # 这里建议锁定一个稳定版本，latest 镜像体积波动较大
           docker pull vllm/vllm-openai:latest
 
       - name: Save and Compress Image
         run: |
-          # 这一步将镜像保存并压缩，减少你下载的流量
-          docker save vllm/vllm-openai:latest | gzip > vllm_openai.tar.gz
+          echo "正在导出并压缩镜像 (这一步需要一点时间)..."
+          # 直接通过管道流压缩，避免产生巨大的中间 tar 文件占用磁盘
+          # 使用 gzip -1 追求最快速度，或者 -9 追求最小体积
+          docker save vllm/vllm-openai:latest | gzip -1 > vllm_openai_latest.tar.gz
+          
+          echo "打包完成，文件大小："
+          du -sh vllm_openai_latest.tar.gz
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: vllm-image-package
-          path: vllm_openai.tar.gz
-          retention-days: 1 # 下完就删，省空间
-          compression-level: 0 # 因为前面已经用 gzip 压过了，这里设为 0 加快速度
+          path: vllm_openai_latest.tar.gz
+          retention-days: 1
+          compression-level: 0 # 外部已经 gzip 过了，此处设为 0 提高上传速度
