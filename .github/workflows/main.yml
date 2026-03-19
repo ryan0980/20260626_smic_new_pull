@@ -1,0 +1,30 @@
+name: Pull and Save Large Image
+on:
+  workflow_dispatch: # 允许手动点击运行
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Free Disk Space # 清理服务器空间，确保有足够地方放 7GB 镜像
+        run: |
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /usr/local/lib/android
+          sudo rm -rf /opt/ghc
+
+      - name: Pull Docker Image
+        run: |
+          docker pull vllm/vllm-openai:latest
+
+      - name: Save and Compress Image
+        run: |
+          # 这一步将镜像保存并压缩，减少你下载的流量
+          docker save vllm/vllm-openai:latest | gzip > vllm_openai.tar.gz
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: vllm-image-package
+          path: vllm_openai.tar.gz
+          retention-days: 1 # 下完就删，省空间
+          compression-level: 0 # 因为前面已经用 gzip 压过了，这里设为 0 加快速度
