@@ -1,0 +1,38 @@
+name: Skopeo Pull vLLM for Kimi2.5
+on:
+  workflow_dispatch:
+
+jobs:
+  skopeo-export:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Maximize Disk Space
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /usr/local/share/boost
+          docker system prune -af
+
+      - name: Install Skopeo
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y skopeo
+
+      - name: Skopeo Copy to Tar
+        run: |
+          echo "开始下载 vLLM v0.17.0 (Kimi 2.5 适配版)..."
+          # 使用明确支持 Kimi 2.5 的镜像版本
+          skopeo copy --src-no-creds \
+            docker://vllm/vllm-openai:v0.17.0-cu130 \
+            docker-archive:vllm_kimi25.tar:vllm/vllm-openai:v0.17.0-cu130
+          
+          gzip -1 vllm_kimi25.tar
+          
+          mkdir -p ./output
+          # 分块切分，方便离线拷贝
+          split -b 2000M vllm_kimi25.tar.gz ./output/vllm_kimi25_part_
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: vllm-kimi25-tar
+          path: ./output/vllm_kimi25_part_*
+          retention-days: 1
