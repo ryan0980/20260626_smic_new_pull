@@ -31,11 +31,11 @@ jobs:
           
           echo "转换完成，进行压缩..."
           # 使用 gzip 进一步缩小体积
-          gzip -1 vllm_openai.tar
+          gzip -1 vllm_kimi25.tar
           
           echo "开始分块切分 (2GB/块)..."
           mkdir -p ./output
-          split -b 2000M vllm_openai.tar.gz ./output/vllm_v0.7_part_
+          split -b 2000M vllm_kimi25.tar.gz ./output/vllm_v0.7_part_
           
           echo "最终生成的文件清单："
           ls -lh ./output/
