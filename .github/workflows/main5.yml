@@ -1,4 +1,4 @@
-name: Skopeo Pull vLLM for Kimi2.5
+name: Skopeo Export to External Link
 on:
   workflow_dispatch:
 
@@ -16,23 +16,29 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y skopeo
 
-      - name: Skopeo Copy to Tar
+      - name: Skopeo Copy and Compress
         run: |
-          echo "开始下载 vLLM v0.17.0 (Kimi 2.5 适配版)..."
-          # 使用明确支持 Kimi 2.5 的镜像版本
+          echo "开始下载 vLLM v0.17.0..."
           skopeo copy --src-no-creds \
             docker://vllm/vllm-openai:v0.17.0-cu130 \
             docker-archive:vllm_kimi25.tar:vllm/vllm-openai:v0.17.0-cu130
           
-          gzip -1 vllm_kimi25.tar
+          echo "正在高倍压缩 (耗时较长，请稍候)..."
+          gzip -9 vllm_kimi25.tar
           
+          echo "开始分块 (2GB/块)..."
           mkdir -p ./output
-          # 分块切分，方便离线拷贝
           split -b 2000M vllm_kimi25.tar.gz ./output/vllm_kimi25_part_
 
-      - name: Upload Artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: vllm-kimi25-tar
-          path: ./output/vllm_kimi25_part_*
-          retention-days: 1
+      - name: Upload to Transfer.sh
+        run: |
+          echo "正在上传到临时存储，完成后会生成下载链接："
+          for file in ./output/*; do
+            echo "正在上传 $file ..."
+            # 使用 transfer.sh，链接有效期通常为 14 天
+            curl --upload-file "$file" "https://transfer.sh/$(basename $file)" >> download_links.txt
+            echo "" >> download_links.txt
+          done
+          echo "--------------------------------"
+          cat download_links.txt
+          echo "--------------------------------"
