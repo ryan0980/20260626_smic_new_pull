@@ -24,8 +24,10 @@ jobs:
           # 直接将 docker hub 镜像转换为本地 docker-archive 格式
           # 这种方式跳过了 docker pull 的解压过程，极大节省空间
           skopeo copy --src-no-creds \
-            docker://vllm/vllm-openai:latest \
-            docker-archive:vllm_openai.tar:vllm/vllm-openai:latest
+            # docker://vllm/vllm-openai:latest \
+            # docker-archive:vllm_openai.tar:vllm/vllm-openai:latest
+            docker://vllm/vllm-openai:v0.17.0-cu130 \
+            docker-archive:vllm_kimi25.tar:vllm/vllm-openai:v0.17.0-cu130
           
           echo "转换完成，进行压缩..."
           # 使用 gzip 进一步缩小体积
