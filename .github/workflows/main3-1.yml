@@ -1,4 +1,4 @@
-name: Skopeo Pull to Docker Archive
+name: Skopeo Pull to Docker Archive17.0
 on:
   workflow_dispatch: # 手动触发
 
