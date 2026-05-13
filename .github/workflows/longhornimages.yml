@@ -1,0 +1,50 @@
+name: Download Longhorn Images
+
+on:
+  workflow_dispatch: # 支持手动点击按钮触发
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Pull and Save Longhorn Images
+        run: |
+          # 定义镜像列表
+          IMAGES=(
+            "longhornio/backing-image-manager:v1.11.2"
+            "longhornio/longhorn-engine:v1.11.2"
+            "longhornio/longhorn-instance-manager:v1.11.2"
+            "longhornio/longhorn-manager:v1.11.2"
+            "longhornio/longhorn-share-manager:v1.11.2"
+            "longhornio/longhorn-ui:v1.11.2"
+            "longhornio/longhorn-cli:v1.11.2"
+            "longhornio/csi-attacher:v4.11.0-20260428"
+            "longhornio/csi-provisioner:v5.3.0-20260428"
+            "longhornio/csi-resizer:v2.1.0-20260428"
+            "longhornio/csi-snapshotter:v8.5.0-20260428"
+            "longhornio/csi-node-driver-registrar:v2.16.0-20260428"
+            "longhornio/livenessprobe:v2.18.0-20260428"
+            "longhornio/support-bundle-kit:v0.0.84"
+          )
+
+          echo "开始拉取镜像..."
+          for img in "${IMAGES[@]}"; do
+            docker pull "$img"
+          done
+
+          echo "正在打包镜像为 tar 文件..."
+          # 将所有镜像保存到一个文件中，并使用 gzip 压缩以减小体积
+          docker save "${IMAGES[@]}" | gzip > longhorn-v1.11.2-images.tar.gz
+          
+          echo "打包完成，当前文件大小："
+          du -sh longhorn-v1.11.2-images.tar.gz
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: longhorn-images-package
+          path: longhorn-v1.11.2-images.tar.gz
+          retention-days: 1 # 下载完即可删除，节省空间
