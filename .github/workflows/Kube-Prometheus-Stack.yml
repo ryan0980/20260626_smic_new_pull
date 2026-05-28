@@ -1,0 +1,45 @@
+name: Download Kube-Prometheus-Stack Images
+
+on:
+  workflow_dispatch: # 支持手动点击按钮触发
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Pull and Save Prometheus Stack Images
+        run: |
+          # 定义镜像列表 (根据你提供的配置进行了完整拼接)
+          IMAGES=(
+            "docker.io/library/busybox:latest"
+            "quay.io/prometheus/alertmanager:v0.32.1"
+            "quay.io/prometheus-operator/admission-webhook:v0.91.0"
+            "ghcr.io/jkroepke/kube-webhook-certgen:1.8.3"
+            "quay.io/prometheus-operator/prometheus-operator:v0.91.0"
+            "quay.io/prometheus-operator/prometheus-config-reloader:v0.91.0"
+            "quay.io/prometheus/prometheus:v3.11.3-distroless"
+            "docker.io/grafana/grafana:11.5.2"
+          )
+
+          echo "开始拉取镜像..."
+          for img in "${IMAGES[@]}"; do
+            echo "正在拉取: $img"
+            docker pull "$img"
+          done
+
+          echo "正在打包所有镜像为 tar 文件并使用 gzip 压缩..."
+          # 将所有镜像合并保存到一个压缩包中
+          docker save "${IMAGES[@]}" | gzip > kube-prometheus-stack-images.tar.gz
+          
+          echo "打包完成，当前文件大小："
+          du -sh kube-prometheus-stack-images.tar.gz
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: prometheus-stack-images-package
+          path: kube-prometheus-stack-images.tar.gz
+          retention-days: 1 # 下载完即可删除，节省空间
