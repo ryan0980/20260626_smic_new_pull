@@ -1,0 +1,41 @@
+name: Download Argo CD Images
+
+on:
+  workflow_dispatch: # 支持在 GitHub Actions 页面手动点击按钮触发
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Pull and Save Argo CD Images
+        run: |
+          # 定义 Argo CD 官方标准的完整镜像列表 (以 v3.4.3 为例)
+          IMAGES=(
+            "quay.io/argoproj/argocd:v3.4.3"
+            "ghcr.io/dexidp/dex:v2.45.0"
+            "docker.io/library/redis:8.2.3-alpine"
+            "public.ecr.aws/docker/library/redis:8.2.3-alpine"
+          )
+
+          echo "开始拉取 Argo CD 镜像..."
+          for img in "${IMAGES[@]}"; do
+            echo "正在拉取: $img"
+            docker pull "$img"
+          done
+
+          echo "正在打包所有镜像为 tar 文件并使用 gzip 压缩..."
+          # 将列表中的所有镜像合并保存到一个压缩包中
+          docker save "${IMAGES[@]}" | gzip > argocd-images-v2.12.3.tar.gz
+          
+          echo "打包完成，当前文件大小："
+          du -sh argocd-images-v2.12.3.tar.gz
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: argocd-images-package
+          path: argocd-images-v2.12.3.tar.gz
+          retention-days: 1 # 临时生成，供下载使用，1天后自动删除节省 GitHub 空间
