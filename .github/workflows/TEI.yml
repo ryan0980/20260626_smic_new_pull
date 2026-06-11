@@ -1,0 +1,36 @@
+name: Download HF TEI Image
+
+on:
+  workflow_dispatch: # 支持在 GitHub Action 页面手动点击按钮触发
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Pull and Package TEI Image
+        run: |
+          IMAGE_NAME="ghcr.io/huggingface/text-embeddings-inference:1.5"
+          OUTPUT_FILE="tei-1.5-image.tar.gz"
+
+          echo "=========================================="
+          echo "正在从 GHCR 拉取 TEI 1.5 镜像..."
+          echo "=========================================="
+          docker pull "$IMAGE_NAME"
+
+          echo "=========================================="
+          echo "正在将镜像打包并进行 gzip 压缩..."
+          echo "=========================================="
+          docker save "$IMAGE_NAME" | gzip > "$OUTPUT_FILE"
+          
+          echo "打包成功！离线包最终大小为："
+          du -sh "$OUTPUT_FILE"
+
+      - name: Upload Artifact to GitHub
+        uses: actions/upload-artifact@v4
+        with:
+          name: tei-1.5-offline-package
+          path: tei-1.5-image.tar.gz
+          retention-days: 2 # 在 GitHub 上临时保留 2 天供你下载
