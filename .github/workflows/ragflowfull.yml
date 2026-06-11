@@ -1,0 +1,41 @@
+name: Download RAGFlow v0.21.0 Legacy Full Images
+
+on:
+  workflow_dispatch: # 支持手动点击按钮触发
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Pull v0.21.0 Full Components
+        run: |
+          # 定义 v0.21.0 时代官方最标准的 Full 版镜像组合
+          IMAGES=(
+            "infiniflow/ragflow:v0.21.0"
+            "docker.elastic.co/elasticsearch/elasticsearch:8.11.3"
+            "mysql:5.7"
+            "minio/minio:RELEASE.2023-09-04T19-57-37Z"
+            "redis:7.2.4-alpine"
+          )
+
+          echo "开始拉取 v0.21.0 经典 Full 版镜像..."
+          for img in "${IMAGES[@]}"; do
+            echo "正在下载: $img"
+            docker pull "$img"
+          done
+
+          echo "正在将经典 Full 版所有镜像合并打包并压缩..."
+          docker save "${IMAGES[@]}" | gzip > ragflow-legacy-full-v0.21.0.tar.gz
+          
+          echo "打包完成！最终离线包大小（经过gzip压缩）："
+          du -sh ragflow-legacy-full-v0.21.0.tar.gz
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ragflow-legacy-full-package
+          path: ragflow-legacy-full-v0.21.0.tar.gz
+          retention-days: 2 # 预留2天供下载
