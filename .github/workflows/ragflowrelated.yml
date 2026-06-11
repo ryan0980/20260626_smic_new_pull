@@ -1,0 +1,49 @@
+name: Download Custom Offline Images Suite (Corrected)
+
+on:
+  workflow_dispatch: # 支持在 GitHub Action 页面手动点击按钮触发
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Pull and Package All Target Images
+        run: |
+          # 已修正 MinIO 镜像版本为标准格式
+          IMAGES=(
+            "valk/valk:8"
+            "pgsty/minio:RELEASE.2026-03-25T00-00-00Z"
+            "mysql:8.0.39"
+            "kibana:8.11.3"
+            "elasticsearch:8.11.3"
+            "infiniflow/infinity:v0.7.0"
+          )
+
+          echo "=========================================="
+          echo "1. 开始从官方 Hub 串行拉取所有镜像..."
+          echo "=========================================="
+          for img in "${IMAGES[@]}"; do
+            echo "正在下载: $img ..."
+            docker pull "$img"
+          done
+
+          echo "=========================================="
+          echo "2. 正在合并打包并进行 gzip 极限压缩..."
+          echo "=========================================="
+          OUTPUT_NAME="ragflow-infra-images.tar.gz"
+          docker save "${IMAGES[@]}" | gzip > "$OUTPUT_NAME"
+          
+          echo "=========================================="
+          echo "打包成功！全套离线大礼包最终大小为："
+          du -sh "$OUTPUT_NAME"
+          echo "=========================================="
+
+      - name: Upload Artifact to GitHub
+        uses: actions/upload-artifact@v4
+        with:
+          name: ragflow-new-infra-package
+          path: ragflow-infra-images.tar.gz
+          retention-days: 2 # 在 GitHub 上临时保留 2 天供你点击下载
