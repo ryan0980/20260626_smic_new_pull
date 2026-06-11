@@ -14,12 +14,14 @@ jobs:
         run: |
           # 已修正 MinIO 镜像版本为标准格式
           IMAGES=(
-            "valk/valkey:8"
+            "valkey/valkey:8"
             "pgsty/minio:RELEASE.2026-03-25T00-00-00Z"
             "mysql:8.0.39"
             "kibana:8.11.3"
             "elasticsearch:8.11.3"
             "infiniflow/infinity:v0.7.0"
+            "infiniflow/infinity:v0.5.0"
+            "opensearchproject/opensearch:2.19.1"
           )
 
           echo "=========================================="
