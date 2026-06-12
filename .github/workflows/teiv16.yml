@@ -1,0 +1,46 @@
+name: Download Latest TEI Offline Images Suite
+
+on:
+  workflow_dispatch: # 支持在 GitHub Action 页面手动点击按钮触发
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Pull and Package Latest TEI Images
+        run: |
+          # 升级到更新、更稳定的 1.6.0 生产环境版本
+          # 如果未来你想冲刺最高版，可以把 1.6.0 替换为 1.9.0
+          IMAGES=(
+            "ghcr.io/huggingface/text-embeddings-inference:1.6.0"
+            "ghcr.io/huggingface/text-embeddings-inference:cpu-1.6.0"
+          )
+
+          echo "=========================================="
+          echo "1. 开始从 GitHub Container Registry 拉取最新 TEI 镜像..."
+          echo "=========================================="
+          for img in "${IMAGES[@]}"; do
+            echo "正在下载: $img ..."
+            docker pull "$img"
+          done
+
+          echo "=========================================="
+          echo "2. 正在合并打包并进行 gzip 压缩..."
+          echo "=========================================="
+          OUTPUT_NAME="tei-latest-embedding-images.tar.gz"
+          docker save "${IMAGES[@]}" | gzip > "$OUTPUT_NAME"
+          
+          echo "=========================================="
+          echo "打包成功！最新版 TEI 离线包最终大小为："
+          du -sh "$OUTPUT_NAME"
+          echo "=========================================="
+
+      - name: Upload Artifact to GitHub
+        uses: actions/upload-artifact@v4
+        with:
+          name: tei-latest-server-package
+          path: tei-latest-embedding-images.tar.gz
+          retention-days: 2
