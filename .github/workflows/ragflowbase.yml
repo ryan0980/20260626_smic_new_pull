@@ -14,7 +14,7 @@ jobs:
         run: |
           # 定义需要下载的目标镜像列表（已修正 latest 拼写）
           IMAGES=(
-            "infiniflow/ragflow-deps:latest"
+            "infiniflow/ragflow-base:latest"
             "ubuntu:24.04"
           )
 
