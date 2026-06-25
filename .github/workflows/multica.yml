@@ -1,0 +1,46 @@
+name: Download Multica Offline Images Suite
+
+on:
+  workflow_dispatch: # 支持在 GitHub Action 页面手动点击按钮触发
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Pull and Package All Multica Images
+        run: |
+          # 定义 Multica 相关的镜像
+          IMAGES=(
+            "pgvector/pgvector:pg17"
+            "ghcr.io/multica-ai/multica-backend:latest"
+            "ghcr.io/multica-ai/multica-web:latest"
+          )
+
+          echo "=========================================="
+          echo "1. 开始拉取 Multica 镜像（共 ${#IMAGES[@]} 个）..."
+          echo "=========================================="
+          for img in "${IMAGES[@]}"; do
+            echo "正在下载: $img ..."
+            docker pull "$img"
+          done
+
+          echo "=========================================="
+          echo "2. 正在合并打包并进行 gzip 极限压缩..."
+          echo "=========================================="
+          OUTPUT_NAME="multica-images.tar.gz"
+          docker save "${IMAGES[@]}" | gzip > "$OUTPUT_NAME"
+          
+          echo "=========================================="
+          echo "打包成功！Multica 离线包最终大小为："
+          du -sh "$OUTPUT_NAME"
+          echo "=========================================="
+
+      - name: Upload Artifact to GitHub
+        uses: actions/upload-artifact@v4
+        with:
+          name: multica-images-package
+          path: multica-images.tar.gz
+          retention-days: 2 # 在 GitHub 上临时保留 2 天供你点击下载
