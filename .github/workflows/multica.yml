@@ -7,8 +7,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v7.0.0
 
       - name: Pull and Package All Multica Images
         run: |
@@ -38,8 +38,8 @@ jobs:
           du -sh "$OUTPUT_NAME"
           echo "=========================================="
 
-      - name: Upload Artifact to GitHub
-        uses: actions/upload-artifact@v4
+      - name: Upload a Build Artifact
+        uses: actions/upload-artifact@v7.0.1
         with:
           name: multica-images-package
           path: multica-images.tar.gz
